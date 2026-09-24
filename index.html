@@ -7,7 +7,8 @@
 <meta name="description" content="Kuis tentang teman sendiri. Online 3–10 pemain, tanpa akun.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bagel+Fat+One&family=Nunito:wght@400;700;900&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%94%3C/text%3E%3C/svg%3E">
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <style>
   :root {
@@ -133,6 +134,27 @@
   .titles div { background: var(--kertas-2); border-radius: 12px; padding: 8px 12px; }
   .titles b { display: block; }
   .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--tinta); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 900; max-width: calc(100% - 32px); z-index: 10; }
+
+  /* ---------- meme stickers ---------- */
+  .qhead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+  @media (max-width: 480px) { .qhead { grid-template-columns: 1fr; } .qhead .meme { justify-self: center; } }
+  .meme {
+    margin: 0; width: 220px; aspect-ratio: 1; max-width: 100%;
+    display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: center;
+    padding: 10px 8px; border-radius: 14px; background: #111 radial-gradient(circle at 50% 45%, #3a3a3a, #0d0d0d 72%);
+    box-shadow: 0 6px 0 rgba(0,0,0,.25); transform: rotate(-1.5deg);
+  }
+  .meme.sm { width: 150px; transform: rotate(2deg); }
+  .meme .em { font-size: 96px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+  .meme.sm .em { font-size: 62px; }
+  .meme .cap {
+    font-family: "Anton", Impact, "Arial Narrow Bold", sans-serif; text-transform: uppercase; text-align: center;
+    color: #fff; font-size: 22px; line-height: 1.05; letter-spacing: .5px; text-wrap: balance;
+    text-shadow: 2px 2px 0 #000, -2px 2px 0 #000, 2px -2px 0 #000, -2px -2px 0 #000, 0 2px 0 #000, 2px 0 0 #000, 0 -2px 0 #000, -2px 0 0 #000;
+  }
+  .meme.sm .cap { font-size: 15px; }
+  .rmeme { display: grid; justify-items: center; }
+  .update { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 30; display: flex; gap: 10px; align-items: center; background: var(--tinta); color: #fff; padding: 8px 10px 8px 16px; border-radius: 14px; font-weight: 900; max-width: calc(100% - 32px); box-shadow: 0 8px 24px rgba(0,0,0,.25); }
 
   /* ---------- chat ---------- */
   .chatp { gap: 10px; }
@@ -298,7 +320,76 @@
     ["Siapa yang paling sering bilang \"terserah\" pas ditanya mau makan apa?", "Ratu Terserah"],
     ["Siapa yang paling mungkin ketahuan bohong?", "Pembohong Amatir"],
     ["Siapa yang paling sering ngemil?", "Mulut Tak Pernah Libur"],
+    ["Siapa yang paling mungkin ketiduran di angkot atau ojol sampai kelewatan?", "Pelor Sejati"],
+    ["Siapa yang paling sering bilang \"bentar lagi\" padahal masih lama?", "Bentar Lagi Abadi"],
+    ["Siapa yang paling mungkin jadi admin grup yang galak?", "Admin Galak"],
+    ["Siapa yang paling sering update status galau?", "Duta Galau"],
+    ["Siapa yang paling mungkin nyasar di mall?", "Anak Hilang"],
+    ["Siapa yang paling sering lupa bawa charger?", "Baterai Sekarat"],
+    ["Siapa yang paling mungkin menang lomba makan kerupuk?", "Juara Tujuhbelasan"],
+    ["Siapa yang paling sering jadi fotografer grup tapi nggak pernah ikut foto?", "Fotografer Abadi"],
+    ["Siapa yang paling mungkin ngutang terus lupa bayar?", "Pengutang Profesional"],
+    ["Siapa yang paling mungkin nangis waktu dengar lagu galau?", "Hati Rapuh"],
+    ["Siapa yang paling mungkin jadi motivator dadakan?", "Motivator KW"],
+    ["Siapa yang paling sering salah kirim chat ke grup?", "Salah Kirim"],
+    ["Siapa yang paling mungkin tidur jam 8 malam?", "Ayam Sore"],
+    ["Siapa yang paling mungkin langsung panik kalau sinyal hilang?", "Budak Sinyal"],
+    ["Siapa yang paling heboh kalau ada diskon?", "Pemburu Promo"],
+    ["Siapa yang paling mungkin jadi pelawak?", "Pelawak Tongkrongan"],
+    ["Siapa yang paling sering nge-PHP?", "Raja PHP"],
+    ["Siapa yang paling sering pura-pura sibuk?", "Sibuk Palsu"],
   ];
+  // "Suara Terbanyak": everyone picks; picking with the majority scores
+  const MAYOR_BANK = [
+    ["Bubur ayam diaduk atau nggak diaduk?", ["Diaduk", "Nggak diaduk"]],
+    ["Mending bakso atau mie ayam?", ["Bakso", "Mie ayam"]],
+    ["Mie instan goreng atau kuah?", ["Goreng", "Kuah"]],
+    ["Martabak manis atau martabak telor?", ["Manis", "Telor"]],
+    ["Kopi atau teh?", ["Kopi", "Teh"]],
+    ["Tim kucing atau tim anjing?", ["Kucing", "Anjing"]],
+    ["Liburan ke pantai atau ke gunung?", ["Pantai", "Gunung"]],
+    ["Balas chat pakai teks atau voice note?", ["Teks", "Voice note"]],
+    ["Tidur lampu nyala atau lampu mati?", ["Nyala", "Mati"]],
+    ["Makan pakai tangan atau pakai sendok?", ["Tangan", "Sendok"]],
+    ["Mending HP ketinggalan atau dompet ketinggalan seharian?", ["HP ketinggalan", "Dompet ketinggalan"]],
+    ["Mending telat 1 jam atau datang 1 jam kepagian?", ["Telat 1 jam", "Kepagian 1 jam"]],
+    ["Kalau meeting atau kelas, duduk di mana?", ["Depan", "Tengah", "Belakang"]],
+    ["Mandi pagi pakai air dingin atau air hangat?", ["Dingin", "Hangat", "Skip mandi"]],
+    ["Mending kaya raya tapi botak, atau biasa aja tapi rambut badai?", ["Kaya botak", "Rambut badai"]],
+    ["Nonton film horor sendirian atau makan 10 cabe rawit?", ["Film horor", "10 cabe rawit"]],
+    ["Sate ayam atau sate kambing?", ["Ayam", "Kambing"]],
+    ["Nasi goreng pakai telor dadar atau telor ceplok?", ["Dadar", "Ceplok"]],
+    ["Hujan-hujan enaknya ngapain?", ["Tidur", "Makan mie", "Main hujan"]],
+    ["Gorengan paling enak?", ["Bakwan", "Tahu isi", "Tempe mendoan", "Pisang goreng"]],
+  ];
+
+  // Meme stickers: our own emoji + caption cards in the classic top/bottom-text format
+  // (no copied photos). Question stickers rotate; reveal stickers follow the outcome.
+  const Q_MEMES = [
+    ["🤔", "MIKIR KERAS", "SAMPE BERASAP"],
+    ["👀", "WADUH", "ADA YANG KESINDIR NIH"],
+    ["😏", "PURA-PURA NGGAK TAU", "PADAHAL TAU BANGET"],
+    ["🫣", "JANGAN AKU", "JANGAN AKU PLIS"],
+    ["🧐", "HMMM…", "MENCURIGAKAN"],
+    ["😶", "AKU MAH APA", "CUMA REMAHAN RENGGINANG"],
+    ["🙏", "YA ALLAH", "SEMOGA BUKAN AKU"],
+    ["😤", "SANTUY", "TAPI DEG-DEGAN"],
+    ["🫠", "OTAK LOADING", "MOHON DITUNGGU"],
+    ["🤫", "DIAM-DIAM", "UDAH TAU JAWABANNYA"],
+  ];
+  const R_MEMES = {
+    me:        ["😭", "KOK AKU", "SALAH APA HAMBA"],
+    unanimous: ["💀", "SEPAKAT SEMUA", "NGGAK ADA YANG BELA"],
+    tie:       ["🤝", "SERI", "SAMA-SAMA CURIGA"],
+    nobody:    ["🤷", "NGGAK ADA YANG KENAL", "TEMAN MACAM APA INI"],
+    all:       ["🎯", "MANTAP JIWA", "KENAL LUAR DALAM"],
+    cuan:      ["🤑", "CUAN", "POIN MASUK BOSKU"],
+    sabar:     ["🥲", "SABAR", "INI UJIAN"],
+    beda:      ["🦄", "ANTI MAINSTREAM", "BEDA SENDIRI"],
+    domba:     ["🐑", "IKUT ARUS", "YANG PENTING RAME"],
+    wkwk:      ["😂", "WKWKWK", "NGAKAK SAMPE GULING-GULING"],
+    seat:      ["🔥", "KURSI PANAS", "SEMUA MATA TERTUJU PADAMU"],
+  };
   const SEAT_BANK = [
     ["Kalau lapar tengah malam, {n} paling pilih…", ["Mie instan", "Nasi goreng", "Martabak", "Seblak"]],
     ["Kalau dapat uang 10 juta mendadak, {n} pakai buat…", ["Liburan", "Ditabung", "Beli gadget", "Traktir teman"]],
@@ -322,6 +413,16 @@
     ["Sarapan favorit {n}?", ["Nasi uduk", "Bubur ayam", "Roti", "Nggak sarapan"]],
     ["Kalau menang undian, {n} pilih hadiah…", ["Motor", "Tiket konser", "HP baru", "Uang tunai"]],
     ["Kebiasaan {n} pas nonton film di bioskop?", ["Beli popcorn", "Main HP", "Ketiduran", "Komentar terus"]],
+    ["Kalau ketemu mantan di jalan, {n} bakal…", ["Pura-pura nggak lihat", "Senyum tipis", "Nyapa santai", "Kabur"]],
+    ["Aplikasi yang paling sering {n} buka?", ["WhatsApp", "TikTok", "Instagram", "YouTube"]],
+    ["Kalau dapat THR, yang pertama {n} beli?", ["Baju baru", "Makanan enak", "Ditabung", "Langsung habis"]],
+    ["{n} paling nggak bisa hidup tanpa…", ["HP", "Kopi", "Sambal", "Tidur siang"]],
+    ["Kalau jadi pemain sinetron, {n} cocok jadi…", ["Tokoh utama", "Pemeran jahat", "Sahabat setia", "Figuran"]],
+    ["Lagu andalan {n} di karaoke?", ["Lagu galau", "Dangdut koplo", "Lagu barat", "Nggak mau nyanyi"]],
+    ["Kalau pesan ojol, {n} biasanya…", ["Kasih bintang 5", "Kasih tip", "Lupa kasih rating", "Chat drivernya terus"]],
+    ["Kalau lagi di kondangan, {n} paling duluan ke…", ["Prasmanan", "Salaman pengantin", "Foto-foto", "Pojok cari kursi"]],
+    ["Kalau mati lampu malam-malam, {n} bakal…", ["Tidur", "Main HP", "Cari lilin", "Panik"]],
+    ["Sambal favorit {n}?", ["Sambal matah", "Sambal terasi", "Sambal bawang", "Nggak suka pedas"]],
   ];
 
   const $ = (s) => document.querySelector(s);
@@ -516,7 +617,7 @@
     if (m.t === "ans" && H.phase === "question" && m.qi === H.qi && H.inGame.includes(pid)) {
       const q = H.qs[H.qi];
       if (q.type === "vote") { const v = str(m.v, 24); if (!H.inGame.includes(v)) return; H.answers[pid] = v; }
-      else { const v = Number(m.v); if (!(v >= 0 && v <= 3)) return; H.answers[pid] = v; }
+      else { const v = Number(m.v); if (!(Number.isInteger(v) && v >= 0 && v < q.opts.length)) return; H.answers[pid] = v; }
       const need = H.inGame.filter(isOn);
       if (need.every((x) => H.answers[x] !== undefined)) resolve(); else hostPublish();
     }
@@ -528,17 +629,20 @@
     return ("Si Paling " + words.join(" ")).slice(0, 32);
   }
   function buildQuestions(players) {
-    const nVote = Math.ceil(H.total / 2);
+    // rotation: Paling Mungkin, Kursi Panas, Suara Terbanyak, repeat
+    const nVote = Math.ceil(H.total / 3);
     // custom questions go first so they are guaranteed a slot, then the order is shuffled
     const pool = [...shuffle(H.customs.map((c) => ({ type: "vote", text: c.text, gelar: gelarOf(c.text) }))),
                   ...shuffle(VOTE_BANK.map(([text, gelar]) => ({ type: "vote", text, gelar })))];
-    const votes = shuffle(pool.slice(0, nVote));
-    const seats = shuffle([...SEAT_BANK]), seatOrder = shuffle([...players]);
+    const votes = shuffle(pool.slice(0, Math.max(nVote, Math.min(H.customs.length, H.total))));
+    const seats = shuffle([...SEAT_BANK]), mayors = shuffle([...MAYOR_BANK]), seatOrder = shuffle([...players]);
     const qs = [];
-    let vi = 0, si = 0, so = 0;
+    let vi = 0, si = 0, mi = 0, so = 0;
     for (let i = 0; i < H.total; i++) {
-      if (i % 2 === 0 && vi < votes.length) qs.push(votes[vi++]);
-      else { const [text, opts] = seats[si++ % seats.length]; qs.push({ type: "seat", text, opts, seat: seatOrder[so++ % seatOrder.length] }); }
+      const slot = i % 3;
+      if ((slot === 0 || (H.customs.length > nVote && vi < votes.length && i % 3 === 2)) && vi < votes.length) qs.push(votes[vi++]);
+      else if (slot === 1) { const [text, opts] = seats[si++ % seats.length]; qs.push({ type: "seat", text, opts, seat: seatOrder[so++ % seatOrder.length] }); }
+      else { const [text, opts] = mayors[mi++ % mayors.length]; qs.push({ type: "mayor", text, opts }); }
     }
     return qs;
   }
@@ -575,6 +679,16 @@
       for (const t of top) H.titles.push({ pid: t, gelar: q.gelar, text: q.text });
       H.reveal = { type: "vote", tally, top };
       if (top.length) sys(`🏅 ${top.map((x) => P(x)?.name || "?").join(" & ")} dapat gelar "${q.gelar}"`);
+    } else if (q.type === "mayor") {
+      const tally = {}; for (const [x, v] of Object.entries(H.answers)) (tally[v] = tally[v] || []).push(x);
+      const max = Math.max(0, ...Object.values(tally).map((a) => a.length));
+      const top = max ? Object.keys(tally).filter((k) => tally[k].length === max).map(Number) : [];
+      // a clear majority scores 100; a tie at the top splits into 50 each
+      const pts = top.length === 1 ? 100 : 50;
+      for (const [x, v] of Object.entries(H.answers)) if (top.includes(v)) gains[x] = pts;
+      H.reveal = { type: "mayor", tally, top };
+      if (top.length === 1) sys(`🐑 Mayoritas pilih "${q.opts[top[0]]}" (${max} suara)`);
+      else if (top.length > 1) sys(`🤝 Seri antara ${top.map((i) => `"${q.opts[i]}"`).join(" dan ")}`);
     } else {
       const ans = H.answers[q.seat];
       const correct = ans === undefined ? [] : Object.keys(H.answers).filter((x) => x !== q.seat && H.answers[x] === ans);
@@ -731,14 +845,18 @@
     const answeredAvs = !reveal ? h("div", { class: "answered", "aria-label": "Sudah menjawab" },
       ...pub.answered.map((pid) => P2[pid] ? avatar(P2[pid], true) : null),
       pub.answered.length ? h("span", { class: "muted", style: "margin-left:4px" }, `${pub.answered.length}/${pub.inGame.length} sudah jawab`) : h("span", { class: "muted" }, "Belum ada yang jawab")) : null;
+    const qMeme = iAmSeat ? R_MEMES.seat : Q_MEMES[(pub.qi * 7 + code.charCodeAt(0)) % Q_MEMES.length];
     main.append(h("div", { class: "panel qcard" + (fresh && !reveal ? " enter" : "") },
-      h("div", { class: "row" }, h("span", { class: "qtype" }, q.type === "vote" ? "Paling mungkin" : "Kursi panas"), h("span", { class: "muted" }, `Pertanyaan ${pub.qi + 1} dari ${pub.qn}`)),
+      h("div", { class: "row" }, h("span", { class: "qtype" }, TYPE_LABEL[q.type]), h("span", { class: "muted" }, `Pertanyaan ${pub.qi + 1} dari ${pub.qn}`)),
       h("div", { class: "progress" }, h("i", { style: `width:${((pub.qi + (reveal ? 1 : 0)) / pub.qn) * 100}%` })),
-      h("div", { class: "qtext" }, qText(q, P2)),
+      h("div", { class: "qhead" },
+        h("div", { class: "qtext" }, qText(q, P2)),
+        reveal ? null : memeCard(qMeme, fresh, true)),
       tbar, answeredAvs,
       h("p", { class: "muted" }, reveal ? "Hasilnya…"
         : !playing ? "Kamu menonton ronde ini."
         : q.type === "vote" ? "Pilih satu teman. Boleh pilih diri sendiri."
+        : q.type === "mayor" ? "Pilih jawaban jujurmu. Kalau sama dengan suara terbanyak, kamu dapat +100."
         : iAmSeat ? "Kamu di kursi panas! Pilih jawaban yang jujur. Kamu dapat +50 untuk setiap teman yang menebak benar."
         : `Tebak jawaban ${P2[q.seat]?.name || "dia"}.`)));
 
@@ -764,7 +882,22 @@
     }
     // ----- reveal -----
     const gains = reveal.gains || {};
-    if (reveal.type === "vote") {
+    main.append(h("div", { class: "rmeme" }, memeCard(revealMeme(reveal, q, gains, playing), fresh, false)));
+    if (reveal.type === "mayor") {
+      const total = Object.values(reveal.tally).reduce((a, b) => a + b.length, 0) || 1;
+      const opts = h("div", { class: "opts" + (fresh ? " anim" : "") });
+      q.opts.forEach((o, i) => {
+        const who = (reveal.tally[i] || []).map((x) => P2[x]?.name || "?");
+        opts.append(h("button", { type: "button", class: "o" + i + (reveal.top.length && !reveal.top.includes(i) ? " dim" : ""), "aria-pressed": String(reveal.top.includes(i)), disabled: true },
+          h("span", { class: "l" }, who.length),
+          h("span", { style: "flex:1" }, o,
+            h("div", { class: "bars", style: "background:rgba(255,255,255,.25)" }, h("i", { style: `width:${(who.length / total) * 100}%;background:#fff` })),
+            who.length ? h("div", { style: "font-size:12px;font-weight:700;opacity:.9" }, who.join(", ")) : null)));
+      });
+      main.append(h("div", { class: "panel" + (fresh ? " enter" : "") },
+        h("div", { class: "gelar" + (fresh ? " stamp" : "") }, !reveal.top.length ? "Nggak ada yang milih" : reveal.top.length === 1 ? `Mayoritas: ${q.opts[reveal.top[0]]}` : "Seri!"),
+        opts, gainLine(gains, P2)));
+    } else if (reveal.type === "vote") {
       const total = Object.values(reveal.tally).reduce((a, b) => a + b.length, 0) || 1;
       const rows = Object.entries(reveal.tally).sort((a, b) => b[1].length - a[1].length);
       const res = h("div", { class: "res" + (fresh ? " anim" : "") });
@@ -793,6 +926,31 @@
         gainLine(gains, P2)));
     }
     if (isHost) main.append(h("div", { class: "row" }, h("button", { class: "btn ghost", type: "button", onclick: () => { H.deadline = 0; } }, pub.qi + 1 >= pub.qn ? "Lihat hasil akhir" : "Lanjut")));
+  }
+  const TYPE_LABEL = { vote: "Paling mungkin", seat: "Kursi panas", mayor: "Suara terbanyak" };
+  function memeCard([emoji, top, bottom], fresh, small) {
+    return h("figure", { class: "meme" + (small ? " sm" : "") + (fresh ? " enter" : ""), "aria-label": `${top} ${bottom}` },
+      h("span", { class: "cap" }, top), h("span", { class: "em" }, emoji), h("span", { class: "cap" }, bottom));
+  }
+  function revealMeme(r, q, gains, playing) {
+    const mine = gains[ME.pid] || 0;
+    if (r.type === "vote") {
+      if (r.top.includes(ME.pid)) return R_MEMES.me;
+      const votes = Object.values(r.tally).reduce((a, b) => a + b.length, 0);
+      if (r.top.length > 1) return R_MEMES.tie;
+      if (r.top.length === 1 && votes >= 3 && r.tally[r.top[0]].length === votes) return R_MEMES.unanimous;
+    } else if (r.type === "seat") {
+      const guessers = Object.keys(r.guesses).length;
+      if (r.answer !== null && guessers && !r.correct.length) return R_MEMES.nobody;
+      if (r.answer !== null && guessers >= 2 && r.correct.length === guessers) return R_MEMES.all;
+    } else if (r.type === "mayor") {
+      if (r.top.length > 1) return R_MEMES.tie;
+      if (playing && !mine && myAns.v !== null) return R_MEMES.beda;
+      if (mine) return R_MEMES.domba;
+    }
+    if (mine) return R_MEMES.cuan;
+    if (playing) return R_MEMES.sabar;
+    return R_MEMES.wkwk;
   }
   function gainLine(gains, P2) {
     const e = Object.entries(gains); if (!e.length) return null;
@@ -870,6 +1028,20 @@
     lastChatSend = performance.now(); postChat("msg", { text }); inp.value = "";
   });
   $("#muteBtn").addEventListener("click", () => setMute(!muted));
+
+  // tell people when a newer version of the game is online (e.g. after an update mid-session)
+  const VERSION = "3";
+  async function checkVersion() {
+    if (location.protocol === "file:" || $("#updateBar")) return;
+    try {
+      const html = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
+      const v = (html.match(/const VERSION = "(\d+)"/) || [])[1];
+      if (v && v !== VERSION) document.body.append(h("div", { class: "update", id: "updateBar", role: "status" },
+        isHost && H && H.phase !== "lobby" && H.phase !== "final" ? "Ada versi baru. Muat ulang setelah kuis selesai." : "Ada versi baru game ini.",
+        h("button", { class: "btn small", type: "button", onclick: () => location.reload() }, "Muat ulang")));
+    } catch {}
+  }
+  setInterval(checkVersion, 90000);
   setMute(muted);
   addEventListener("pointerdown", initAudio, { once: true });
   addEventListener("beforeunload", (e) => { if (isHost && H && H.phase !== "lobby" && H.phase !== "final") { e.preventDefault(); e.returnValue = ""; } });
