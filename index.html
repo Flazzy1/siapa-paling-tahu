@@ -430,6 +430,99 @@
   const KETIK_BANK = ["sabar ini ujian", "aku mah apa atuh", "otw padahal baru mandi", "mager tingkat dewa", "santuy aja bro", "gas terus pantang mundur", "nggak ada obat", "kerja bagus tim", "mantap jiwa sekali", "jangan lupa bahagia"];
   const MINI_POINTS = [150, 100, 60];
 
+  // ---- question pack 2 (everything above is pack 1, which groups already played) ----
+  const VOTE_NEW = [
+    ["Siapa yang paling cocok jadi pemeran utama FTV?", "Bintang FTV"],
+    ["Siapa yang paling heboh kalau nonton konser?", "Penonton Paling Heboh"],
+    ["Siapa yang paling sering ngaku-ngaku kenal artis?", "Kenal Artis Katanya"],
+    ["Siapa yang paling mungkin buka usaha dan langsung laris?", "Calon Juragan"],
+    ["Siapa yang paling sering senyum-senyum sendiri lihat HP?", "Senyum Sendiri"],
+    ["Siapa yang paling cocok jadi ketua RT?", "Ketua RT Masa Depan"],
+    ["Siapa yang paling mungkin menang lomba panjat pinang?", "Raja Panjat Pinang"],
+    ["Siapa yang paling mungkin nemu duit di jalan?", "Si Hoki"],
+    ["Siapa yang paling lama kalau siap-siap mau pergi?", "Siap-Siap Sejam"],
+    ["Siapa yang paling mungkin nyasar di hutan tapi malah bikin konten?", "Konten Kreator Nekat"],
+    ["Siapa yang paling cocok jadi juri ajang pencarian bakat?", "Juri Galak"],
+    ["Siapa yang paling sering mimpi aneh-aneh?", "Pemimpi Aneh"],
+    ["Siapa yang paling cepat tidur begitu kepala nyentuh bantal?", "Pelor Level Dewa"],
+    ["Siapa yang paling sering ngomong sendiri?", "Master Monolog"],
+    ["Siapa yang paling mungkin menang debat walaupun salah?", "Jago Debat"],
+    ["Siapa yang paling panik kalau disuruh presentasi?", "Demam Panggung"],
+    ["Siapa yang paling sering checkout barang terus nyesel?", "Korban Checkout"],
+    ["Siapa yang paling sering bilang kenyang padahal masih lapar?", "Jaim Makan"],
+    ["Siapa yang paling rajin komentar di live streaming?", "Netizen Aktif"],
+    ["Siapa yang paling kuat seminggu tanpa HP?", "Anti Gadget"],
+    ["Siapa yang paling sering ngetik \"wkwk\" padahal mukanya datar?", "Wkwk Palsu"],
+    ["Siapa yang paling cocok jadi tour guide dadakan?", "Pemandu Wisata"],
+    ["Siapa yang paling heboh kalau lihat kucing?", "Pecinta Kucing"],
+    ["Siapa yang paling mungkin ketiduran di bioskop?", "Tidur di Bioskop"],
+    ["Siapa yang paling cepat ngabisin kuota?", "Pemakan Kuota"],
+    ["Siapa yang paling sering bilang \"nanti aku traktir\" tapi nggak pernah?", "Traktir Wacana"],
+    ["Siapa yang paling sering lupa naruh kunci?", "Pencari Kunci"],
+    ["Siapa yang paling mungkin jadi orang pertama yang datang ke acara?", "Datang Paling Pagi"],
+    ["Siapa yang paling sering jadi korban nyamuk?", "Makanan Nyamuk"],
+    ["Siapa yang paling mungkin tiba-tiba jadi atlet setelah nonton Olimpiade?", "Atlet Musiman"],
+    ["Siapa yang paling cocok jadi penyiar radio?", "Suara Emas"],
+    ["Siapa yang paling mungkin rela antre berjam-jam demi makanan viral?", "Pemburu Viral"],
+  ];
+  const SEAT_NEW = [
+    ["Kalau {n} jadi presiden sehari, yang pertama dilakukan…", ["Bikin libur nasional", "Gratiskan makanan", "Naikkan gaji", "Tidur di istana"]],
+    ["Emoji yang paling sering {n} pakai?", ["😂", "🙏", "😭", "👍"]],
+    ["Kalau cuma boleh makan satu menu seumur hidup, {n} pilih…", ["Nasi Padang", "Mie instan", "Sate", "Martabak"]],
+    ["Jam tidur {n} biasanya?", ["Sebelum jam 10", "Jam 10–12", "Jam 12–2", "Subuh baru tidur"]],
+    ["Kalau dapat tiket gratis, {n} pilih ke…", ["Jepang", "Korea", "Bali", "Eropa"]],
+    ["Kalau hujan deras tapi harus pergi, {n} bakal…", ["Terobos pakai jas hujan", "Tunggu reda", "Batal pergi", "Pesan taksi online"]],
+    ["Cara {n} ngilangin stres?", ["Makan", "Tidur", "Belanja", "Main game"]],
+    ["Kalau nemu dompet di jalan, {n} bakal…", ["Cari pemiliknya", "Bawa ke kantor polisi", "Umumkan di medsos", "Bingung sendiri"]],
+    ["Kalau {n} jadi tokoh film, jadi…", ["Pahlawan", "Penjahat", "Tokoh lucu", "Figuran yang mati duluan"]],
+    ["{n} paling nggak tahan sama…", ["Orang telat", "Orang berisik", "Chat cuma dibaca", "Antrean panjang"]],
+    ["Minuman kekinian favorit {n}?", ["Es kopi susu", "Boba", "Matcha", "Es teh jumbo"]],
+    ["Kalau ke mall, {n} pasti mampir ke…", ["Food court", "Toko baju", "Toko buku", "Tempat main"]],
+    ["Kalau {n} jadi YouTuber, kontennya tentang…", ["Mukbang", "Gaming", "Vlog jalan-jalan", "Prank"]],
+    ["Warna favorit {n}?", ["Hitam", "Biru", "Merah", "Pink"]],
+    ["Kalau dapat cuti seminggu, {n} bakal…", ["Liburan jauh", "Pulang kampung", "Rebahan di rumah", "Tetap kerja"]],
+    ["Kalau lagi nunggu, {n} biasanya…", ["Main HP", "Ngemil", "Ngelamun", "Ngajak ngobrol orang"]],
+    ["Kalau di rumah sendirian, {n} biasanya…", ["Nyanyi keras-keras", "Nonton film", "Tidur", "Masak"]],
+    ["Mie instan versi {n}?", ["Pakai telur", "Pakai sayur", "Cabai banyak", "Polos aja"]],
+    ["Kalau boleh pelihara hewan unik, {n} pilih…", ["Kapibara", "Burung hantu", "Ular", "Kura-kura"]],
+    ["Kalau lupa bawa dompet pas makan, {n} bakal…", ["Telepon teman", "Cuci piring", "Transfer lewat HP", "Kabur"]],
+  ];
+  const MAYOR_NEW = [
+    ["Nasi uduk atau nasi kuning?", ["Nasi uduk", "Nasi kuning"]],
+    ["Es teh manis atau es jeruk?", ["Es teh", "Es jeruk"]],
+    ["Tim tempe atau tim tahu?", ["Tempe", "Tahu"]],
+    ["Bakso urat atau bakso halus?", ["Urat", "Halus"]],
+    ["Pagi-pagi mending olahraga atau tidur lagi?", ["Olahraga", "Tidur lagi"]],
+    ["Mending naik motor atau naik mobil?", ["Motor", "Mobil"]],
+    ["Nonton film enaknya di bioskop atau di rumah?", ["Bioskop", "Rumah"]],
+    ["Libur panjang tapi nggak punya uang, atau kerja terus tapi gaji besar?", ["Libur tanpa uang", "Kerja gaji besar"]],
+    ["Nasi Padang enaknya makan di tempat atau dibungkus?", ["Makan di tempat", "Dibungkus"]],
+    ["Seblak pedasnya level berapa?", ["Level 0", "Level 1–3", "Level 5", "Level setan"]],
+    ["Kalau chat, gaya ngetik kamu…", ["HURUF BESAR", "huruf kecil semua", "Normal aja"]],
+    ["Mie ayam pakai pangsit basah atau goreng?", ["Basah", "Goreng"]],
+    ["Kalau ada tikus di rumah, kamu bakal…", ["Kejar sendiri", "Teriak minta tolong", "Pura-pura nggak lihat"]],
+    ["Lebih serem mana?", ["Hantu", "Tagihan kartu kredit", "Chat \"kita perlu bicara\""]],
+    ["Jalan kaki 5 km atau naik tangga 20 lantai?", ["Jalan 5 km", "Tangga 20 lantai"]],
+    ["Sambal paling enak itu…", ["Pedas banget", "Pedas manis", "Nggak pedas"]],
+    ["Di kelas atau kantor, lebih parah mana?", ["Ngantuk", "Lapar"]],
+    ["Susu duluan atau sereal duluan?", ["Susu duluan", "Sereal duluan"]],
+    ["Kalau ke pantai, paling seru…", ["Berenang", "Foto-foto", "Makan seafood", "Tidur di pasir"]],
+    ["Suara paling nyebelin?", ["Alarm pagi", "Kucing berantem", "Tetangga karaoke", "Nyamuk di kuping"]],
+  ];
+  const EMOJI_NEW = [
+    ["🏍️🌧️🥶", ["Kehujanan naik motor", "Mudik", "Balap liar", "Touring"]],
+    ["👻🏠🔦", ["Uji nyali", "Nginep di rumah nenek", "Mati lampu", "Ronda malam"]],
+    ["🍳🔥🧯", ["Masakan gosong", "Lomba masak", "Makan malam romantis", "Sarapan pagi"]],
+    ["📚😴📝", ["Ketiduran pas belajar", "Ujian lancar", "Baca novel", "Perpustakaan"]],
+    ["💍💃🍛", ["Kondangan", "Arisan", "Konser", "Lebaran"]],
+    ["🧳🚌🏡", ["Mudik", "Study tour", "Pindah rumah", "Kemah"]],
+    ["🎆🕛🥳", ["Tahun baru", "Ulang tahun", "Lebaran", "Tujuhbelasan"]],
+    ["🇮🇩🥇🍘", ["Lomba makan kerupuk", "Upacara bendera", "Pawai budaya", "Olimpiade"]],
+    ["🛒💳😭", ["Kalap belanja", "Gajian", "Diskon habis", "Kartu hilang"]],
+    ["🦟🔊😤", ["Nyamuk berisik", "Konser", "Tetangga karaoke", "Alarm pagi"]],
+  ];
+  const KETIK_NEW = ["gas pol rem blong", "hidup itu keras bro", "tidur adalah koentji", "nasi padang pakai rendang", "kerjakan dulu baru rebahan", "dompet menangis tanggal tua", "senin lagi senin lagi", "makan dulu baru mikir", "jangan baper ya gengs", "wacana doang nih grup"];
+
   const R_MEMES = {
     me:        ["😭", "KOK AKU", "SALAH APA HAMBA"],
     unanimous: ["💀", "SEPAKAT SEMUA", "NGGAK ADA YANG BELA"],
@@ -556,6 +649,19 @@
     const box = $("#floaters"); if (box.childElementCount > 24) return;
     const el = h("div", { class: "floater", style: `left:${8 + Math.random() * 80}%;--dx:${(Math.random() - .5) * 120}px` }, h("span", { class: "e" }, e), name ? h("small", {}, name) : null);
     box.append(el); setTimeout(() => el.remove(), 2700);
+  }
+
+  // ---------------- question packs & anti-repeat ----------------
+  // The host's browser remembers questions already asked and prefers unseen ones.
+  // First run with pack 2 counts all of pack 1 as seen, so new questions come first.
+  const PACK1 = [...VOTE_BANK, ...SEAT_BANK, ...MAYOR_BANK, ...EMOJI_BANK].map((x) => x[0]).concat(KETIK_BANK);
+  VOTE_BANK.push(...VOTE_NEW); SEAT_BANK.push(...SEAT_NEW); MAYOR_BANK.push(...MAYOR_NEW); EMOJI_BANK.push(...EMOJI_NEW); KETIK_BANK.push(...KETIK_NEW);
+  const USED_KEY = "spt-used-v2";
+  function usedSet() { let u = ls.get(USED_KEY, null); if (!Array.isArray(u)) { u = PACK1; ls.set(USED_KEY, u); } return new Set(u); }
+  function markUsed(texts) { ls.set(USED_KEY, [...new Set([...usedSet(), ...texts])].slice(-600)); }
+  function freshFirst(list, keyOf) {
+    const used = usedSet();
+    return [...shuffle(list.filter((x) => !used.has(keyOf(x)))), ...shuffle(list.filter((x) => used.has(keyOf(x))))];
   }
 
   // ---------------- identity & connection ----------------
@@ -703,9 +809,9 @@
     const nVote = Math.ceil(H.total / 3);
     // custom questions go first so they are guaranteed a slot, then the order is shuffled
     const pool = [...shuffle(H.customs.map((c) => ({ type: "vote", text: c.text, gelar: gelarOf(c.text) }))),
-                  ...shuffle(VOTE_BANK.map(([text, gelar]) => ({ type: "vote", text, gelar })))];
+                  ...freshFirst(VOTE_BANK, (x) => x[0]).map(([text, gelar]) => ({ type: "vote", text, gelar }))];
     const votes = shuffle(pool.slice(0, Math.max(nVote, Math.min(H.customs.length, H.total))));
-    const seats = shuffle([...SEAT_BANK]), mayors = shuffle([...MAYOR_BANK]), seatOrder = shuffle([...players]);
+    const seats = freshFirst(SEAT_BANK, (x) => x[0]), mayors = freshFirst(MAYOR_BANK, (x) => x[0]), seatOrder = shuffle([...players]);
     const qs = [];
     let vi = 0, si = 0, mi = 0, so = 0;
     for (let i = 0; i < H.total; i++) {
@@ -723,6 +829,7 @@
       slots.push(Math.max(1, Math.min(qs.length, base + Math.floor(Math.random() * 3) - 1)));
     }
     [...new Set(slots)].sort((a, b) => b - a).forEach((pos, k) => qs.splice(pos, 0, { type: "mini", kind: kinds[k % kinds.length] }));
+    markUsed(qs.filter((q) => q.type !== "mini").map((q) => q.text));
     return qs;
   }
   // fill in a minigame's content and timing right before it plays; the answer stays on the host
@@ -733,7 +840,7 @@
     if (q.kind === "reflex") { q.goAt = q.startAt + 1500 + Math.random() * 3000; q.endsAt = q.goAt + 3000; }
     else q.endsAt = q.startAt + info.secs * 1000;
     if (q.kind === "emoji") {
-      const [clue, opts] = EMOJI_BANK[Math.floor(Math.random() * EMOJI_BANK.length)];
+      const [clue, opts] = freshFirst(EMOJI_BANK, (x) => x[0])[0]; markUsed([clue]);
       const order = shuffle([0, 1, 2, 3]);
       q.clue = clue; q.opts = order.map((i) => opts[i]); H.miniAns = order.indexOf(0);
     } else if (q.kind === "math") {
@@ -743,7 +850,7 @@
       wrong.delete(right);
       const opts = shuffle([right, ...[...wrong].slice(0, 3)]);
       q.clue = `${a} + ${b} × ${c}`; q.opts = opts.map(String); H.miniAns = opts.indexOf(right);
-    } else if (q.kind === "ketik") q.phrase = KETIK_BANK[Math.floor(Math.random() * KETIK_BANK.length)];
+    } else if (q.kind === "ketik") { q.phrase = freshFirst(KETIK_BANK, (x) => x)[0]; markUsed([q.phrase]); }
     H.deadline = q.endsAt + 1500;
   }
   function resolveMini(q, gains) {
@@ -766,7 +873,8 @@
     sys(w ? `🎮 ${MINI_INFO[q.kind].name}: ${P(w.pid)?.name || "?"} juara (${w.label})!` : `🎮 ${MINI_INFO[q.kind].name}: nggak ada yang berhasil 😅`);
   }
   function hostStart() {
-    const ps = H.order.filter(isOn);
+    // generous window: a player whose connection hiccuped a moment ago still gets a seat
+    const ps = H.order.filter((x) => x === H.host || Date.now() - P(x).seen < 30000);
     if (ps.length < MIN_PLAYERS) return toast(`Butuh minimal ${MIN_PLAYERS} pemain online.`);
     H.inGame = ps.slice(0, MAX_PLAYERS);
     for (const x of H.order) P(x).score = 0;
@@ -1282,7 +1390,7 @@
   $("#muteBtn").addEventListener("click", () => setMute(!muted));
 
   // tell people when a newer version of the game is online (e.g. after an update mid-session)
-  const VERSION = "4";
+  const VERSION = "5";
   async function checkVersion() {
     if (location.protocol === "file:" || $("#updateBar")) return;
     try {
