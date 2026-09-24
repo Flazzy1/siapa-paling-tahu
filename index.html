@@ -133,6 +133,61 @@
   .titles div { background: var(--kertas-2); border-radius: 12px; padding: 8px 12px; }
   .titles b { display: block; }
   .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--tinta); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 900; max-width: calc(100% - 32px); z-index: 10; }
+
+  /* ---------- chat ---------- */
+  .chatp { gap: 10px; }
+  .msgs { height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 12px; background: var(--kertas); }
+  @media (max-width: 780px) { .msgs { height: 220px; } }
+  .msg { display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: start; max-width: 92%; animation: masuk .25s ease-out; }
+  .msg .b { background: var(--putih); border: 2px solid var(--garis); border-radius: 4px 12px 12px 12px; padding: 5px 10px; font-size: 14px; overflow-wrap: anywhere; }
+  .msg .b b { display: block; font-size: 12px; }
+  .msg.mine { align-self: flex-end; grid-template-columns: 1fr; }
+  .msg.mine .b { background: #ffe6de; border-color: #ffc9b8; border-radius: 12px 4px 12px 12px; }
+  .msg .av.s { width: 26px; height: 26px; font-size: 12px; }
+  .msg.sys { align-self: center; grid-template-columns: 1fr; max-width: 100%; }
+  .msg.sys .b { background: var(--kuning); border-color: transparent; border-radius: 999px; font-weight: 900; font-size: 13px; text-align: center; }
+  .msgs .empty { margin: auto; color: var(--redup); font-size: 13px; text-align: center; }
+  .reacts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .reacts button { border: 2px solid var(--garis); background: var(--putih); border-radius: 999px; font-size: 20px; line-height: 1; padding: 6px 9px; transition: transform .1s; }
+  .reacts button:active { transform: scale(1.25); }
+  .send { display: flex; gap: 8px; }
+  .send input { flex: 1; min-width: 0; }
+  .icon-btn { border: 2px solid var(--garis); background: var(--putih); border-radius: 10px; padding: 4px 9px; font-size: 18px; line-height: 1.2; }
+
+  /* ---------- life ---------- */
+  #fx { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
+  .floaters { position: fixed; inset: 0; pointer-events: none; z-index: 21; overflow: hidden; }
+  .floater { position: absolute; bottom: -60px; display: grid; justify-items: center; animation: naik 2.6s ease-out forwards; }
+  .floater .e { font-size: 42px; line-height: 1; }
+  .floater small { font-size: 11px; font-weight: 900; background: var(--tinta); color: #fff; padding: 1px 7px; border-radius: 999px; }
+  @keyframes naik { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 12% { opacity: 1; transform: translate(0, -80px) scale(1.1); } 100% { transform: translate(var(--dx, 0px), -70vh) scale(1); opacity: 0; } }
+  @keyframes masuk { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes pop { 0% { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes cap { 0% { transform: scale(2.2) rotate(-8deg); opacity: 0; } 60% { transform: scale(.94) rotate(-3deg); opacity: 1; } 100% { transform: scale(1) rotate(-2deg); } }
+  @keyframes tumbuh { from { width: 0; } }
+  @keyframes susut { from { width: 100%; } to { width: 0%; } }
+  @keyframes goyang { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
+  .enter { animation: pop .35s ease-out both; }
+  .enter-2 { animation: pop .35s ease-out .12s both; }
+  .answered { display: flex; flex-wrap: wrap; gap: 4px; min-height: 28px; align-items: center; }
+  .answered .av { animation: pop .3s ease-out both; box-shadow: 0 0 0 2px var(--tinta); }
+  .tbar { height: 8px; border-radius: 999px; background: rgba(255,255,255,.15); overflow: hidden; }
+  .tbar i { display: block; height: 100%; width: 0; background: var(--koral); border-radius: 999px; }
+  .anim .bars i { animation: tumbuh .9s cubic-bezier(.2,.8,.2,1) both; }
+  .anim .r { animation: masuk .4s ease-out both; }
+  .gelar.stamp { display: inline-block; animation: cap .55s cubic-bezier(.2,.9,.3,1.2) both; }
+  .lobby-avs { display: flex; flex-wrap: wrap; gap: 12px; }
+  .lobby-avs .p { display: grid; justify-items: center; gap: 4px; font-size: 13px; font-weight: 900; max-width: 76px; }
+  .lobby-avs .p span { max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lobby-avs .av { width: 52px; height: 52px; font-size: 22px; }
+  .lobby-avs .new .av { animation: pop .45s ease-out both; }
+  .lobby-avs .av:hover { animation: goyang .4s; }
+  .opts button, .pick button { transition: transform .1s; }
+  .opts button:not(:disabled):active, .pick button:not(:disabled):active { transform: scale(.96); }
+  @media (prefers-reduced-motion: reduce) {
+    .enter, .enter-2, .answered .av, .anim .bars i, .anim .r, .gelar.stamp, .lobby-avs .new .av, .msg, .floater { animation: none !important; }
+    .floater { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -171,11 +226,21 @@
       <span class="chip" id="netChip"><span class="dot"></span><span id="netText">Menyambung…</span></span>
       <span class="sp"></span>
       <span class="timer" id="timer"></span>
+      <button class="icon-btn" type="button" id="muteBtn" aria-label="Suara">🔊</button>
       <button class="btn ghost small" type="button" id="leaveBtn">Keluar</button>
     </div>
     <div class="layout">
       <div class="col" id="main"></div>
       <div class="col">
+        <div class="panel chatp">
+          <h3 style="font-size:20px">Obrolan</h3>
+          <div class="msgs" id="msgs" aria-live="polite"></div>
+          <div class="reacts" id="reacts" aria-label="Kirim reaksi"></div>
+          <form class="send" id="chatForm" autocomplete="off">
+            <input type="text" id="chatInput" maxlength="200" placeholder="Tulis pesan…" aria-label="Pesan">
+            <button class="btn small" type="submit">Kirim</button>
+          </form>
+        </div>
         <div class="panel">
           <h3 style="font-size:20px">Skor</h3>
           <div class="players" id="board"></div>
@@ -185,6 +250,8 @@
   </section>
 </div>
 <div class="toast" id="toast" hidden></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="floaters" id="floaters" aria-hidden="true"></div>
 
 <script>
 (() => {
@@ -280,6 +347,56 @@
   function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
   function colorOf(pid) { let x = 0; for (const c of pid) x = (x * 31 + c.charCodeAt(0)) >>> 0; return AV[x % AV.length]; }
   const avatar = (p, small) => h("div", { class: "av" + (small ? " s" : ""), style: `background:${colorOf(p.pid)}` }, (p.name[0] || "?").toUpperCase());
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------------- sound ----------------
+  let actx = null, muted = ls.get("spt-mute", false);
+  function initAudio() { if (muted) return; try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch {} }
+  function tone(type, f0, f1, dur, vol, delay = 0) {
+    if (muted || !actx) return;
+    const t = actx.currentTime + delay, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  }
+  const SFX = {
+    click: () => tone("triangle", 660, 880, .08, .12),
+    blip: () => tone("sine", 1200, 1500, .05, .05),
+    tick: () => tone("square", 1000, 1000, .04, .05),
+    whoosh: () => tone("sine", 300, 900, .25, .08),
+    reveal: () => { tone("triangle", 523, 523, .12, .12); tone("triangle", 659, 659, .12, .12, .1); tone("triangle", 784, 784, .2, .12, .2); },
+    coin: () => { tone("square", 988, 988, .07, .07); tone("square", 1319, 1319, .2, .07, .07); },
+    msg: () => tone("sine", 880, 660, .09, .06),
+    fanfare: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone("triangle", f, f, i === 5 ? .5 : .14, .13, i * .13)),
+  };
+  function setMute(v) { muted = v; ls.set("spt-mute", v); $("#muteBtn").textContent = v ? "🔇" : "🔊"; $("#muteBtn").setAttribute("aria-label", v ? "Suara mati" : "Suara nyala"); if (!v) initAudio(); }
+
+  // ---------------- confetti ----------------
+  const fx = $("#fx"), fxc = fx.getContext("2d"); let bits = [], fxRun = false;
+  function confetti(n = 80, fromX = .5) {
+    if (reduceMotion) return;
+    fx.width = innerWidth; fx.height = innerHeight;
+    const cols = ["#ff6b4a", "#1fa39a", "#ffd54a", "#5b7bea", "#f28fb0"];
+    for (let i = 0; i < n; i++) bits.push({ x: innerWidth * fromX + (Math.random() - .5) * 120, y: innerHeight * .35, vx: (Math.random() - .5) * 12, vy: -Math.random() * 12 - 4, r: Math.random() * 6.28, vr: (Math.random() - .5) * .4, s: 5 + Math.random() * 6, c: cols[i % cols.length], life: 1 });
+    if (!fxRun) { fxRun = true; requestAnimationFrame(fxLoop); }
+  }
+  function fxLoop() {
+    fxc.clearRect(0, 0, fx.width, fx.height);
+    bits = bits.filter((b) => b.life > 0 && b.y < fx.height + 20);
+    for (const b of bits) {
+      b.vy += .35; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr; b.life -= .006;
+      fxc.save(); fxc.translate(b.x, b.y); fxc.rotate(b.r); fxc.globalAlpha = Math.max(0, b.life); fxc.fillStyle = b.c; fxc.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); fxc.restore();
+    }
+    if (bits.length) requestAnimationFrame(fxLoop); else { fxRun = false; fxc.clearRect(0, 0, fx.width, fx.height); }
+  }
+
+  // ---------------- floating reactions ----------------
+  const REACTS = ["😂", "🔥", "😱", "👏", "💀", "😭", "🤔", "❤️"];
+  function floatEmoji(e, name) {
+    const box = $("#floaters"); if (box.childElementCount > 24) return;
+    const el = h("div", { class: "floater", style: `left:${8 + Math.random() * 80}%;--dx:${(Math.random() - .5) * 120}px` }, h("span", { class: "e" }, e), name ? h("small", {}, name) : null);
+    box.append(el); setTimeout(() => el.remove(), 2700);
+  }
 
   // ---------------- identity & connection ----------------
   const ME = ls.get("spt-me", null) || { pid: rnd(10), key: rnd(16), name: "" };
@@ -289,18 +406,20 @@
 
   function connect(roomCode, asHost) {
     if (client) try { client.end(true); } catch {}
-    code = roomCode; isHost = asHost; pub = null; lastPubSeen = ""; lastPub = "";
+    code = roomCode; isHost = asHost; pub = null; lastPubSeen = ""; lastPub = ""; chat.clear(); renderChat();
     client = mqtt.connect(BROKER, { clientId: "spt_" + ME.pid + "_" + rnd(4), clean: true, reconnectPeriod: 2000, connectTimeout: 10000, keepalive: 30 });
     client.on("connect", () => {
       online = true; renderNet();
-      const subs = [topic("pub")]; if (isHost) subs.push(topic("up"));
-      client.subscribe(subs, { qos: 1 }, () => { if (isHost) flush(); send({ t: "join", name: ME.name }); });
+      const subs = [topic("pub"), topic("chat"), topic("chatlog")]; if (isHost) subs.push(topic("up"));
+      client.subscribe(subs, { qos: 1 }, () => { if (isHost) { flush(); flushChat(); } send({ t: "join", name: ME.name }); });
     });
     client.on("close", () => { online = false; renderNet(); });
     client.on("message", (t, payload) => {
       let m; try { m = JSON.parse(payload.toString()); } catch { return; }
       if (!m || typeof m !== "object") return;
       if (t === topic("up")) { if (isHost) hostOnUp(m); return; }
+      if (t === topic("chat")) { onChat(m, true); return; }
+      if (t === topic("chatlog")) { if (Array.isArray(m.log)) { for (const c of m.log) onChat(c, false); } return; }
       skew = (m.now || Date.now()) - Date.now(); clearTimeout(joinTimer);
       const k = JSON.stringify({ ...m, now: 0 }); if (k === lastPubSeen) return;
       lastPubSeen = k; const prev = pub; pub = m; render(prev);
@@ -309,6 +428,58 @@
     if (!isHost) joinTimer = setTimeout(() => { if (!pub) { leave(); $("#joinErr").textContent = "Room tidak ditemukan atau tuan rumahnya offline. Cek lagi kodenya."; } }, 9000);
   }
   function send(o) { if (client) client.publish(topic("up"), JSON.stringify({ ...o, pid: ME.pid, key: ME.key }), { qos: 1 }); }
+
+  // ---------------- chat ----------------
+  // Everyone publishes straight to the chat topic; the host keeps the last messages
+  // in a retained "chatlog" so people who join or reload see recent history.
+  const chat = new Map(); let chatQueued = 0, lastChatSend = 0;
+  function sanitizeChat(c) {
+    if (!c || typeof c !== "object") return null;
+    const id = str(c.id, 20), pid = str(c.pid, 24); if (!id || !pid) return null;
+    const kind = c.k === "sys" || c.k === "react" ? c.k : "msg";
+    const out = { id, pid, k: kind, name: str(c.name, 14), at: Number(c.at) || Date.now() };
+    if (kind === "react") { if (!REACTS.includes(c.e)) return null; out.e = c.e; }
+    else { out.text = str(c.text, 200); if (!out.text) return null; }
+    return out;
+  }
+  function onChat(raw, live) {
+    const c = sanitizeChat(raw); if (!c) return;
+    if (c.k === "sys" && pub && c.pid !== pub.host) return; // only the host speaks for the game
+    if (c.k === "react") { if (live) { const nm = byPid()[c.pid]?.name || c.name; floatEmoji(c.e, c.pid === ME.pid ? "kamu" : nm); } return; }
+    if (chat.has(c.id)) return;
+    chat.set(c.id, c);
+    if (chat.size > 80) chat.delete(chat.keys().next().value);
+    if (isHost && H) { H.chat = [...chat.values()].sort((a, b) => a.at - b.at).slice(-40); hostChatDirty(); }
+    if (live && c.pid !== ME.pid && c.k === "msg") SFX.msg();
+    if (!chatQueued) chatQueued = requestAnimationFrame(() => { chatQueued = 0; renderChat(); });
+  }
+  function postChat(k, extra) {
+    if (!client) return;
+    const msg = { id: rnd(10), pid: ME.pid, name: ME.name, k, at: Date.now() + skew, ...extra };
+    client.publish(topic("chat"), JSON.stringify(msg), { qos: 1 });
+  }
+  function renderChat() {
+    const box = $("#msgs"); if (!box) return;
+    const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+    box.replaceChildren();
+    const list = [...chat.values()].sort((a, b) => a.at - b.at).slice(-60);
+    if (!list.length) box.append(h("p", { class: "empty" }, "Belum ada obrolan. Sapa teman-temanmu!"));
+    const P2 = byPid();
+    for (const c of list) {
+      const name = P2[c.pid]?.name || c.name || "?";
+      if (c.k === "sys") { box.append(h("div", { class: "msg sys" }, h("div", { class: "b" }, c.text))); continue; }
+      const mine = c.pid === ME.pid;
+      box.append(h("div", { class: "msg" + (mine ? " mine" : "") },
+        mine ? null : avatar({ pid: c.pid, name }, true),
+        h("div", { class: "b" }, mine ? null : h("b", { style: `color:${shade(colorOf(c.pid))}` }, name), c.text)));
+    }
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  }
+  function shade(hex) { const n = parseInt(hex.slice(1), 16); const f = (c) => Math.round(c * .55); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }
+  let chatTimer = 0;
+  function hostChatDirty() { if (!chatTimer) chatTimer = setTimeout(flushChat, 400); }
+  function flushChat() { chatTimer = 0; if (isHost && H && client && online) client.publish(topic("chatlog"), JSON.stringify({ log: H.chat || [] }), { qos: 1, retain: true }); }
+  function sys(text) { if (isHost) postChat("sys", { text }); }
   setInterval(() => { if (client && online) send({ t: "ping" }); }, 4000);
 
   // ---------------- HOST ----------------
@@ -377,11 +548,18 @@
     H.inGame = ps.slice(0, MAX_PLAYERS);
     for (const x of H.order) P(x).score = 0;
     H.titles = []; H.qs = buildQuestions(H.inGame); H.qi = -1;
+    sys(`🎬 Kuis dimulai! ${H.qs.length} pertanyaan, ${H.inGame.length} pemain. Semangat!`);
     nextQuestion();
   }
   function nextQuestion() {
     H.qi++;
-    if (H.qi >= H.qs.length) { H.phase = "final"; H.deadline = 0; H.reveal = null; return hostPublish(); }
+    if (H.qi >= H.qs.length) {
+      H.phase = "final"; H.deadline = 0; H.reveal = null;
+      const res = H.inGame.map((x) => P(x)).filter(Boolean).sort((a, b) => b.score - a.score);
+      const top = res.filter((p) => p.score === res[0]?.score).map((p) => p.name);
+      if (top.length) sys(`👑 ${top.join(" & ")} paling kenal teman-temannya dengan ${res[0].score} poin!`);
+      return hostPublish();
+    }
     const q = H.qs[H.qi];
     if (q.type === "seat" && !H.inGame.includes(q.seat)) q.seat = H.inGame[H.qi % H.inGame.length];
     H.phase = "question"; H.answers = {}; H.reveal = null; H.deadline = Date.now() + Q_SECS * 1000;
@@ -396,12 +574,17 @@
       for (const [voter, v] of Object.entries(H.answers)) if (top.includes(v)) gains[voter] = 100;
       for (const t of top) H.titles.push({ pid: t, gelar: q.gelar, text: q.text });
       H.reveal = { type: "vote", tally, top };
+      if (top.length) sys(`🏅 ${top.map((x) => P(x)?.name || "?").join(" & ")} dapat gelar "${q.gelar}"`);
     } else {
       const ans = H.answers[q.seat];
       const correct = ans === undefined ? [] : Object.keys(H.answers).filter((x) => x !== q.seat && H.answers[x] === ans);
       for (const c of correct) gains[c] = 100;
       if (correct.length) gains[q.seat] = 50 * correct.length;
       H.reveal = { type: "seat", answer: ans ?? null, guesses: Object.fromEntries(Object.entries(H.answers).filter(([x]) => x !== q.seat)), correct };
+      const seatName = P(q.seat)?.name || "Dia";
+      sys(ans === undefined ? `🙈 ${seatName} lupa menjawab`
+        : correct.length ? `🎯 ${correct.map((x) => P(x)?.name || "?").join(", ")} tahu jawaban ${seatName}: ${q.opts[ans]}`
+        : `😅 Nggak ada yang kenal ${seatName}. Jawabannya: ${q.opts[ans]}`);
     }
     for (const [x, g] of Object.entries(gains)) if (P(x)) P(x).score += g;
     H.reveal.gains = gains;
@@ -446,17 +629,33 @@
     const main = $("#main"); main.replaceChildren();
     if (!pub) { main.append(h("div", { class: "panel" }, h("h2", {}, "Menyambung…"), h("p", { class: "muted" }, "Menghubungi tuan rumah room " + code + "."))); return; }
     if (pub.qi !== myAns.qi) myAns = { qi: pub.qi, v: null };
+    // animations and sounds play once per phase, not on every re-render
+    const key = pub.phase + ":" + pub.qi;
+    const fresh = key !== lastKey; lastKey = key;
     if (pub.phase === "lobby") {
       renderLobby(main);
       const inp = $("#customInput");
       if (inp && draftVal) inp.value = draftVal;
       if (inp && draftFocus) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
     }
-    else if (pub.phase === "final") renderFinal(main);
-    else renderQuestion(main);
-    if (prev && prev.phase !== "reveal" && pub.phase === "reveal") { const g = pub.reveal?.gains?.[ME.pid]; if (g) toast(`+${g} poin!`); }
+    else if (pub.phase === "final") renderFinal(main, fresh);
+    else renderQuestion(main, fresh);
+    if (fresh && prev) {
+      if (pub.phase === "question") SFX.whoosh();
+      if (pub.phase === "reveal") {
+        SFX.reveal();
+        const g = pub.reveal?.gains?.[ME.pid];
+        if (g) { setTimeout(SFX.coin, 350); toast(`+${g} poin!`); confetti(40); }
+      }
+      if (pub.phase === "final") { SFX.fanfare(); confetti(160); setTimeout(() => confetti(100, .25), 500); setTimeout(() => confetti(100, .75), 900); }
+    }
+    // someone else just answered
+    if (prev && pub.phase === "question" && prev.qi === pub.qi && (pub.answered?.length || 0) > (prev.answered?.length || 0)) SFX.blip();
+    renderChat(); // names in chat follow the roster
     tick();
   }
+  let lastKey = "", lastTickSec = -1;
+  const seenLobby = new Set();
 
   function renderBoard() {
     const box = $("#board"); box.replaceChildren(); if (!pub) return;
@@ -485,6 +684,14 @@
         h("button", { class: "btn", type: "button", onclick: () => copy(link, "Link disalin. Kirim ke teman!") }, "Salin link undangan"),
         h("button", { class: "btn ghost", type: "button", onclick: () => copy(code, "Kode disalin") }, "Salin kode")),
       h("p", { class: "muted" }, `Teman cukup buka link, isi nama, lalu klik Gabung. ${MIN_PLAYERS}–${MAX_PLAYERS} pemain.`)));
+    // who's here: avatars pop in as people arrive
+    const avs = h("div", { class: "lobby-avs" });
+    for (const p of pub.players) {
+      const isNew = !seenLobby.has(p.pid); seenLobby.add(p.pid);
+      avs.append(h("div", { class: "p" + (isNew ? " new" : ""), style: p.online ? "" : "opacity:.45" }, avatar(p), h("span", {}, p.name + (p.pid === ME.pid ? " (kamu)" : ""))));
+    }
+    main.append(h("div", { class: "panel" }, h("h2", {}, `${pub.players.length} orang di sini`), avs,
+      h("p", { class: "muted" }, "Sambil menunggu, ngobrol dulu di kolom obrolan.")));
     // custom questions
     const input = h("input", { type: "text", id: "customInput", maxlength: "110", placeholder: "Siapa yang paling mungkin…" });
     const addForm = h("form", { class: "row", autocomplete: "off", onsubmit: (e) => {
@@ -510,14 +717,25 @@
     main.append(panel);
   }
 
-  function renderQuestion(main) {
+  function renderQuestion(main, fresh) {
     const q = pub.q; if (!q) return;
     const P2 = byPid(), playing = pub.inGame.includes(ME.pid), iAmSeat = q.type === "seat" && q.seat === ME.pid;
     const reveal = pub.phase === "reveal" ? pub.reveal : null;
-    main.append(h("div", { class: "panel qcard" },
+    // time bar: one CSS animation over the whole answer window, offset by time already spent,
+    // so re-renders continue it instead of restarting it
+    let tbar = null;
+    if (!reveal && pub.deadline) {
+      const left = Math.max(0, (pub.deadline - (Date.now() + skew)) / 1000);
+      tbar = h("div", { class: "tbar" }, h("i", { style: `animation:susut ${Q_SECS}s linear ${-(Q_SECS - left).toFixed(2)}s forwards` }));
+    }
+    const answeredAvs = !reveal ? h("div", { class: "answered", "aria-label": "Sudah menjawab" },
+      ...pub.answered.map((pid) => P2[pid] ? avatar(P2[pid], true) : null),
+      pub.answered.length ? h("span", { class: "muted", style: "margin-left:4px" }, `${pub.answered.length}/${pub.inGame.length} sudah jawab`) : h("span", { class: "muted" }, "Belum ada yang jawab")) : null;
+    main.append(h("div", { class: "panel qcard" + (fresh && !reveal ? " enter" : "") },
       h("div", { class: "row" }, h("span", { class: "qtype" }, q.type === "vote" ? "Paling mungkin" : "Kursi panas"), h("span", { class: "muted" }, `Pertanyaan ${pub.qi + 1} dari ${pub.qn}`)),
       h("div", { class: "progress" }, h("i", { style: `width:${((pub.qi + (reveal ? 1 : 0)) / pub.qn) * 100}%` })),
       h("div", { class: "qtext" }, qText(q, P2)),
+      tbar, answeredAvs,
       h("p", { class: "muted" }, reveal ? "Hasilnya…"
         : !playing ? "Kamu menonton ronde ini."
         : q.type === "vote" ? "Pilih satu teman. Boleh pilih diri sendiri."
@@ -531,14 +749,14 @@
         for (const pid of pub.inGame) {
           const p = P2[pid]; if (!p) continue;
           grid.append(h("button", { type: "button", "aria-pressed": String(myAns.v === pid), disabled: !playing,
-            onclick: () => { myAns = { qi: pub.qi, v: pid }; send({ t: "ans", qi: pub.qi, v: pid }); render(); } },
+            onclick: () => { initAudio(); SFX.click(); myAns = { qi: pub.qi, v: pid }; send({ t: "ans", qi: pub.qi, v: pid }); render(); } },
             avatar(p), h("span", { class: "nm" }, p.name + (pid === ME.pid ? " (kamu)" : ""))));
         }
         main.append(h("div", { class: "panel" }, grid, answered ? h("p", { class: "muted" }, "Jawaban terkirim. Masih bisa diganti sebelum waktu habis.") : null));
       } else {
         const opts = h("div", { class: "opts" });
         q.opts.forEach((o, i) => opts.append(h("button", { type: "button", class: "o" + i, "aria-pressed": String(myAns.v === i), disabled: !playing,
-          onclick: () => { myAns = { qi: pub.qi, v: i }; send({ t: "ans", qi: pub.qi, v: i }); render(); } },
+          onclick: () => { initAudio(); SFX.click(); myAns = { qi: pub.qi, v: i }; send({ t: "ans", qi: pub.qi, v: i }); render(); } },
           h("span", { class: "l" }, "ABCD"[i]), o)));
         main.append(h("div", { class: "panel" }, opts, answered ? h("p", { class: "muted" }, "Jawaban terkirim. Masih bisa diganti sebelum waktu habis.") : null));
       }
@@ -549,17 +767,17 @@
     if (reveal.type === "vote") {
       const total = Object.values(reveal.tally).reduce((a, b) => a + b.length, 0) || 1;
       const rows = Object.entries(reveal.tally).sort((a, b) => b[1].length - a[1].length);
-      const res = h("div", { class: "res" });
-      if (reveal.top.length) res.append(h("div", {}, h("p", { class: "muted" }, "Gelar baru:"), h("div", { class: "gelar" }, `${reveal.top.map((x) => P2[x]?.name || "?").join(" & ")}: ${q.gelar}`)));
+      const res = h("div", { class: "res" + (fresh ? " anim" : "") });
+      if (reveal.top.length) res.append(h("div", {}, h("p", { class: "muted" }, "Gelar baru:"), h("div", { class: "gelar" + (fresh ? " stamp" : "") }, `${reveal.top.map((x) => P2[x]?.name || "?").join(" & ")}: ${q.gelar}`)));
       else res.append(h("p", { class: "muted" }, "Tidak ada yang memilih."));
-      for (const [pid, voters] of rows) {
+      rows.forEach(([pid, voters], idx) => {
         const p = P2[pid] || { pid, name: "?" };
-        res.append(h("div", { class: "r" + (reveal.top.includes(pid) ? " top" : "") }, avatar(p),
+        res.append(h("div", { class: "r" + (reveal.top.includes(pid) ? " top" : ""), style: `animation-delay:${.15 + idx * .12}s` }, avatar(p),
           h("div", {}, h("div", { class: "nm", style: "font-weight:900" }, `${p.name} · ${voters.length} suara`),
             h("div", { class: "bars" }, h("i", { style: `width:${(voters.length / total) * 100}%` })),
             h("div", { class: "voters" }, ...voters.map((v) => h("span", { class: "tag" }, "dipilih " + (P2[v]?.name || "?")))))));
-      }
-      main.append(h("div", { class: "panel" }, res, gainLine(gains, P2)));
+      });
+      main.append(h("div", { class: "panel" + (fresh ? " enter" : "") }, res, gainLine(gains, P2)));
     } else {
       const seatName = P2[q.seat]?.name || "Dia";
       const opts = h("div", { class: "opts" });
@@ -568,8 +786,8 @@
         opts.append(h("button", { type: "button", class: "o" + i + (reveal.answer !== null && reveal.answer !== i ? " dim" : ""), "aria-pressed": String(reveal.answer === i), disabled: true },
           h("span", { class: "l" }, "ABCD"[i]), h("span", {}, o, who.length ? h("div", { style: "font-size:12px;font-weight:700;opacity:.9" }, "Tebakan: " + who.join(", ")) : null)));
       });
-      main.append(h("div", { class: "panel" },
-        h("div", { class: "gelar" }, reveal.answer === null ? `${seatName} tidak menjawab` : `Jawaban ${seatName}: ${q.opts[reveal.answer]}`),
+      main.append(h("div", { class: "panel" + (fresh ? " enter" : "") },
+        h("div", { class: "gelar" + (fresh ? " stamp" : "") }, reveal.answer === null ? `${seatName} tidak menjawab` : `Jawaban ${seatName}: ${q.opts[reveal.answer]}`),
         opts,
         h("p", { class: "muted" }, reveal.correct.length ? `${reveal.correct.map((x) => P2[x]?.name || "?").join(", ")} menebak benar.` : "Tidak ada yang menebak benar."),
         gainLine(gains, P2)));
@@ -581,17 +799,17 @@
     return h("div", { class: "row" }, ...e.map(([x, g]) => h("span", { class: "chip" }, h("span", { class: "gain" }, `+${g}`), P2[x]?.name || "?")));
   }
 
-  function renderFinal(main) {
+  function renderFinal(main, fresh) {
     const P2 = byPid();
     const res = pub.players.filter((p) => pub.inGame.includes(p.pid)).sort((a, b) => b.score - a.score);
-    main.append(h("div", { class: "panel" },
-      h("p", { class: "muted" }, "Yang paling kenal teman-temannya"),
-      h("h2", { style: "font-size:clamp(34px,9vw,56px);color:var(--koral)" }, res[0] ? res.filter((p) => p.score === res[0].score).map((p) => p.name).join(" & ") : "Selesai"),
-      h("div", { class: "podium" }, ...res.map((p, i) => h("div", { class: "r" }, h("span", { class: "rank" }, i + 1), h("span", {}, p.name + (p.pid === ME.pid ? " (kamu)" : "")), h("span", {}, p.score + " poin"))))));
+    main.append(h("div", { class: "panel" + (fresh ? " enter" : "") },
+      h("p", { class: "muted" }, "👑 Yang paling kenal teman-temannya"),
+      h("h2", { class: fresh ? "gelar stamp" : "", style: "font-size:clamp(34px,9vw,56px);color:var(--koral)" }, res[0] ? res.filter((p) => p.score === res[0].score).map((p) => p.name).join(" & ") : "Selesai"),
+      h("div", { class: "podium" }, ...res.map((p) => h("div", { class: "r" }, h("span", { class: "rank" }, 1 + res.filter((o) => o.score > p.score).length), h("span", {}, p.name + (p.pid === ME.pid ? " (kamu)" : "")), h("span", {}, p.score + " poin"))))));
     const byP = {}; for (const t of pub.titles) (byP[t.pid] = byP[t.pid] || []).push(t.gelar);
     const titles = h("div", { class: "titles" });
     for (const [pid, gs] of Object.entries(byP).sort((a, b) => b[1].length - a[1].length)) titles.append(h("div", {}, h("b", {}, P2[pid]?.name || "?"), gs.join(" · ")));
-    main.append(h("div", { class: "panel" }, h("h2", {}, "Gelar yang didapat"), Object.keys(byP).length ? titles : h("p", { class: "muted" }, "Belum ada gelar.")));
+    main.append(h("div", { class: "panel" + (fresh ? " enter-2" : "") }, h("h2", {}, "Gelar yang didapat"), Object.keys(byP).length ? titles : h("p", { class: "muted" }, "Belum ada gelar.")));
     main.append(isHost ? h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: hostReset }, "Main lagi")) : h("p", { class: "muted" }, "Tunggu tuan rumah memulai game baru."));
   }
 
@@ -601,6 +819,8 @@
     const s = Math.max(0, Math.ceil((pub.deadline - (Date.now() + skew)) / 1000));
     el.textContent = pub.phase === "question" ? s : "";
     el.classList.toggle("hot", s <= 5);
+    if (pub.phase === "question" && s <= 5 && s > 0 && s !== lastTickSec) { lastTickSec = s; SFX.tick(); }
+    if (s > 5) lastTickSec = -1;
   }
   setInterval(tick, 250);
 
@@ -635,6 +855,23 @@
     connect(c, false);
   });
   $("#leaveBtn").addEventListener("click", leave);
+
+  // chat, reactions, sound
+  let lastReact = 0;
+  for (const e of REACTS) $("#reacts").append(h("button", { type: "button", "aria-label": "Reaksi " + e, onclick: () => {
+    initAudio();
+    if (performance.now() - lastReact < 700) return; lastReact = performance.now();
+    postChat("react", { e });
+  } }, e));
+  $("#chatForm").addEventListener("submit", (e) => {
+    e.preventDefault(); initAudio();
+    const inp = $("#chatInput"), text = inp.value.trim(); if (!text || !client) return;
+    if (performance.now() - lastChatSend < 600) return toast("Pelan-pelan ngetiknya 😄");
+    lastChatSend = performance.now(); postChat("msg", { text }); inp.value = "";
+  });
+  $("#muteBtn").addEventListener("click", () => setMute(!muted));
+  setMute(muted);
+  addEventListener("pointerdown", initAudio, { once: true });
   addEventListener("beforeunload", (e) => { if (isHost && H && H.phase !== "lobby" && H.phase !== "final") { e.preventDefault(); e.returnValue = ""; } });
   if (typeof mqtt === "undefined") $("#joinErr").textContent = "Gagal memuat komponen koneksi. Cek internet lalu muat ulang halaman.";
   showHome();
