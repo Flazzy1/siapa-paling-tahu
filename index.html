@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Siapa Paling Tahu?</title>
+<meta name="description" content="Kuis tentang teman sendiri. Online 3–10 pemain, tanpa akun.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@400;700;900&display=swap">
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --kertas: #fbf6ea;
+    --kertas-2: #f3ead4;
+    --putih: #ffffff;
+    --tinta: #1d2a44;
+    --redup: #5d6780;
+    --garis: #e5dcc4;
+    --koral: #ff6b4a;
+    --koral-gelap: #c9472b;
+    --toska: #1fa39a;
+    --kuning: #ffd54a;
+    --opsi-a: #ff6b4a;
+    --opsi-b: #1fa39a;
+    --opsi-c: #f2a516;
+    --opsi-d: #5b7bea;
+    --display: "Bagel Fat One", "Arial Rounded MT Bold", system-ui, sans-serif;
+    --body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--kertas); color: var(--tinta); font-family: var(--body); font-size: 15px; line-height: 1.45;
+    background-image: radial-gradient(var(--garis) 1.2px, transparent 1.2px); background-size: 22px 22px;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding-inline: 16px; padding-block: 16px 28px; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; letter-spacing: .3px; text-wrap: balance; }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--toska); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  input[type=text], select { width: 100%; padding: 11px 12px; border-radius: 12px; border: 2px solid var(--garis); background: var(--putih); color: var(--tinta); }
+  label.f { display: grid; gap: 6px; font-size: 12px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: var(--redup); }
+
+  .btn { border: 0; border-radius: 12px; padding: 11px 16px; font-weight: 900; background: var(--koral); color: #fff; box-shadow: 0 4px 0 var(--koral-gelap); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--koral-gelap); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn.ghost { background: var(--putih); color: var(--tinta); border: 2px solid var(--garis); box-shadow: 0 3px 0 var(--garis); }
+  .btn.small { padding: 6px 10px; font-size: 13px; border-radius: 10px; }
+
+  .panel { background: var(--putih); border: 2px solid var(--garis); border-radius: 18px; padding: 18px; display: grid; gap: 14px; align-content: start; }
+  .muted { color: var(--redup); font-size: 13px; margin: 0; }
+  .err { color: var(--koral-gelap); font-size: 13px; font-weight: 700; margin: 0; min-height: 1em; }
+
+  .hero { display: grid; gap: 10px; padding-block: 22px 18px; }
+  .hero h1 { font-size: clamp(46px, 12vw, 88px); line-height: .95; }
+  .hero h1 span { color: var(--koral); }
+  .hero p { margin: 0; max-width: 56ch; color: var(--redup); font-size: 16px; }
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .panel h2 { font-size: 26px; }
+  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 18px; }
+  .how div { background: var(--kertas-2); border-radius: 14px; padding: 12px 14px; }
+  .how b { font-family: var(--display); font-weight: 400; font-size: 20px; }
+  .how p { margin: 4px 0 0; color: var(--redup); font-size: 13px; }
+
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 14px; }
+  .bar h1 { font-size: 26px; }
+  .bar .sp { flex: 1; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--putih); border: 2px solid var(--garis); font-size: 13px; font-weight: 900; color: var(--redup); white-space: nowrap; }
+  .chip.code { color: var(--tinta); letter-spacing: 3px; font-size: 15px; }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--koral); }
+  .chip.on .dot { background: var(--toska); }
+  .timer { font-family: var(--display); font-size: 32px; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; color: var(--toska); }
+  .timer.hot { color: var(--koral); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+  @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+  .col { display: grid; gap: 16px; min-width: 0; }
+
+  .qcard { background: var(--tinta); color: var(--kertas); border: 0; }
+  .qcard .muted { color: #b9c2d8; }
+  .qtype { display: inline-block; font-size: 12px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--kuning); color: var(--tinta); justify-self: start; }
+  .qtext { font-family: var(--display); font-size: clamp(26px, 6vw, 38px); line-height: 1.1; }
+  .progress { height: 6px; border-radius: 999px; background: rgba(255,255,255,.15); overflow: hidden; }
+  .progress i { display: block; height: 100%; background: var(--kuning); }
+
+  .pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .pick button { display: grid; justify-items: center; gap: 6px; padding: 14px 8px; border-radius: 14px; background: var(--putih); border: 2px solid var(--garis); color: var(--tinta); font-weight: 900; box-shadow: 0 3px 0 var(--garis); }
+  .pick button[aria-pressed="true"] { border-color: var(--koral); background: #fff0ec; box-shadow: 0 3px 0 var(--koral); }
+  .pick button:disabled { cursor: default; }
+  .pick .nm { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 480px) { .opts { grid-template-columns: 1fr; } }
+  .opts button { text-align: left; display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: 14px; border: 0; color: #fff; font-weight: 900; font-size: 16px; box-shadow: 0 4px 0 rgba(0,0,0,.2); }
+  .opts button .l { font-family: var(--display); font-size: 22px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; background: rgba(255,255,255,.25); flex: none; }
+  .opts button[aria-pressed="true"] { outline: 4px solid var(--tinta); outline-offset: 2px; }
+  .opts button.dim { opacity: .35; }
+  .o0 { background: var(--opsi-a); } .o1 { background: var(--opsi-b); } .o2 { background: var(--opsi-c); } .o3 { background: var(--opsi-d); }
+
+  .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; color: var(--tinta); flex: none; }
+  .av.s { width: 28px; height: 28px; font-size: 13px; }
+
+  .players { display: grid; gap: 6px; }
+  .pl { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; font-size: 14px; }
+  .pl .nm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pl .sc { font-variant-numeric: tabular-nums; font-weight: 900; }
+  .pl.off .nm { color: var(--redup); }
+  .ok { color: var(--toska); font-weight: 900; }
+  .tag { font-size: 11px; font-weight: 900; letter-spacing: .5px; padding: 1px 7px; border-radius: 999px; background: var(--kertas-2); color: var(--redup); }
+  .tag.gold { background: var(--kuning); color: var(--tinta); }
+
+  .res { display: grid; gap: 10px; }
+  .res .r { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; }
+  .res .top .nm { color: var(--koral-gelap); }
+  .bars { height: 12px; border-radius: 999px; background: var(--kertas-2); overflow: hidden; margin-top: 4px; }
+  .bars i { display: block; height: 100%; background: var(--koral); border-radius: 999px; }
+  .voters { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .gain { font-weight: 900; color: var(--toska); }
+  .gelar { font-family: var(--display); font-size: 28px; color: var(--koral); line-height: 1.1; }
+
+  .big-code { font-weight: 900; font-size: clamp(44px, 13vw, 72px); letter-spacing: 8px; line-height: 1; color: var(--koral); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .customs { display: grid; gap: 4px; max-height: 160px; overflow-y: auto; font-size: 14px; }
+  .customs div { padding: 6px 10px; background: var(--kertas-2); border-radius: 8px; }
+  .podium { display: grid; gap: 8px; }
+  .podium .r { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; background: var(--kertas-2); border-radius: 12px; padding: 8px 12px; font-weight: 900; }
+  .podium .r:first-child { background: var(--kuning); }
+  .podium .rank { font-family: var(--display); font-size: 22px; }
+  .titles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .titles div { background: var(--kertas-2); border-radius: 12px; padding: 8px 12px; }
+  .titles b { display: block; }
+  .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--tinta); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 900; max-width: calc(100% - 32px); z-index: 10; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="home">
+    <div class="hero">
+      <h1>Siapa <span>Paling</span> Tahu?</h1>
+      <p>Kuis tentang teman sendiri. Tebak siapa yang paling sering telat, tebak makanan favorit temanmu, dan buktikan siapa yang paling kenal satu sama lain.</p>
+    </div>
+    <div class="home-grid">
+      <form class="panel" id="formCreate" autocomplete="off">
+        <h2>Buat room</h2>
+        <label class="f" for="nameCreate">Nama kamu<input type="text" id="nameCreate" maxlength="14" required placeholder="mis. Dhalhaz"></label>
+        <button class="btn" type="submit">Buat room baru</button>
+        <p class="muted">Kamu jadi tuan rumah. Biarkan tab ini tetap terbuka selama main.</p>
+      </form>
+      <form class="panel" id="formJoin" autocomplete="off">
+        <h2>Gabung room</h2>
+        <label class="f" for="nameJoin">Nama kamu<input type="text" id="nameJoin" maxlength="14" required placeholder="mis. Rara"></label>
+        <label class="f" for="codeJoin">Kode room<input type="text" id="codeJoin" maxlength="5" required placeholder="mis. KBW7Q" style="text-transform:uppercase;letter-spacing:3px"></label>
+        <button class="btn" type="submit">Gabung</button>
+        <p class="err" id="joinErr"></p>
+      </form>
+    </div>
+    <div class="how">
+      <div><b>Paling Mungkin</b><p>"Siapa yang paling sering telat?" Semua memilih satu teman. Pilihanmu sama dengan suara terbanyak: +100. Yang terpilih dapat gelar.</p></div>
+      <div><b>Kursi Panas</b><p>Satu orang menjawab jujur tentang dirinya, yang lain menebak. Tebakan benar: +100. Si kursi panas dapat +50 per teman yang benar.</p></div>
+      <div><b>Pertanyaan sendiri</b><p>Di lobi, siapa saja bisa menambah pertanyaan "Siapa yang paling…" versi kalian sendiri.</p></div>
+    </div>
+  </section>
+
+  <section id="room" hidden>
+    <div class="bar">
+      <h1>Siapa Paling Tahu?</h1>
+      <span class="chip code" id="codeChip"></span>
+      <span class="chip" id="netChip"><span class="dot"></span><span id="netText">Menyambung…</span></span>
+      <span class="sp"></span>
+      <span class="timer" id="timer"></span>
+      <button class="btn ghost small" type="button" id="leaveBtn">Keluar</button>
+    </div>
+    <div class="layout">
+      <div class="col" id="main"></div>
+      <div class="col">
+        <div class="panel">
+          <h3 style="font-size:20px">Skor</h3>
+          <div class="players" id="board"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  "use strict";
+  const BROKER = "wss://broker.hivemq.com:8884/mqtt";
+  const NS = "siapapalingtahu/v1/";
+  const Q_SECS = 20, REVEAL_SECS = 9, MIN_PLAYERS = 3, MAX_PLAYERS = 10;
+  const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const AV = ["#ffb4a2", "#9fe0d9", "#ffe08a", "#b8c7ff", "#f9b6d6", "#c7f0a4", "#ffd0a0", "#d6c2ff", "#a8e3ff", "#f0d7b0"];
+
+  const VOTE_BANK = [
+    ["Siapa yang paling sering telat?", "Raja Telat"],
+    ["Siapa yang paling mungkin ketiduran pas meeting atau kelas?", "Tukang Molor"],
+    ["Siapa yang paling mungkin jadi sultan duluan?", "Calon Sultan"],
+    ["Siapa yang paling lama balas chat?", "Balasnya Besok"],
+    ["Siapa yang paling mungkin nangis nonton film?", "Hati Hello Kitty"],
+    ["Siapa yang paling mungkin nyasar padahal pakai Google Maps?", "Navigator Gagal"],
+    ["Siapa yang paling jago ngeles?", "Master Ngeles"],
+    ["Siapa yang paling mungkin viral di TikTok?", "Calon Seleb"],
+    ["Siapa yang paling sering bilang \"otw\" padahal baru mandi?", "Otw Palsu"],
+    ["Siapa yang paling mungkin selamat kalau ada kiamat zombie?", "Penyintas Zombie"],
+    ["Siapa yang paling mungkin lupa ulang tahun temannya?", "Pelupa Akut"],
+    ["Siapa yang paling boros jajan?", "Dompet Bocor"],
+    ["Siapa yang paling heboh kalau cerita?", "Tukang Drama"],
+    ["Siapa yang paling mungkin masih main HP jam 3 pagi?", "Kalong"],
+    ["Siapa yang paling susah diajak foto?", "Anti Kamera"],
+    ["Siapa yang paling cepat habis makannya?", "Vacuum Cleaner"],
+    ["Siapa yang paling sering pinjam barang lalu lupa balikin?", "Peminjam Abadi"],
+    ["Siapa yang paling rapi?", "Si Paling Rapi"],
+    ["Siapa yang paling mungkin kabur pas diajak olahraga?", "Anti Keringat"],
+    ["Siapa yang paling ribet kalau pesan makanan?", "Pelanggan Ribet"],
+    ["Siapa yang paling sering jadi korban prank?", "Korban Abadi"],
+    ["Siapa yang paling mungkin nikah duluan?", "Calon Penganten"],
+    ["Siapa yang ketawanya paling kencang?", "Ketawa Toa"],
+    ["Siapa yang paling sering menghilang dari grup chat?", "Hantu Grup"],
+    ["Siapa yang paling mungkin ketinggalan pesawat?", "Penumpang Terakhir"],
+    ["Siapa yang paling bisa dipercaya jaga rahasia?", "Brankas Rahasia"],
+    ["Siapa yang paling mungkin kalap belanja pas flash sale?", "Korban Flash Sale"],
+    ["Siapa yang paling takut kecoa?", "Musuh Kecoa"],
+    ["Siapa yang paling pede nyanyi di karaoke?", "Diva Karaoke"],
+    ["Siapa yang paling mungkin jadi bos kalian semua nanti?", "Calon Bos"],
+    ["Siapa yang paling sering punya ide aneh-aneh?", "Raja Ide Aneh"],
+    ["Siapa yang paling mungkin jadi tempat curhat?", "Psikolog Dadakan"],
+    ["Siapa yang paling sering bilang \"terserah\" pas ditanya mau makan apa?", "Ratu Terserah"],
+    ["Siapa yang paling mungkin ketahuan bohong?", "Pembohong Amatir"],
+    ["Siapa yang paling sering ngemil?", "Mulut Tak Pernah Libur"],
+  ];
+  const SEAT_BANK = [
+    ["Kalau lapar tengah malam, {n} paling pilih…", ["Mie instan", "Nasi goreng", "Martabak", "Seblak"]],
+    ["Kalau dapat uang 10 juta mendadak, {n} pakai buat…", ["Liburan", "Ditabung", "Beli gadget", "Traktir teman"]],
+    ["Minuman favorit {n}?", ["Kopi", "Teh manis", "Boba", "Air putih"]],
+    ["Hari libur ideal {n}?", ["Tidur seharian", "Nongkrong", "Jalan-jalan", "Main game"]],
+    ["Kalau {n} jadi hewan, jadi apa?", ["Kucing", "Kukang", "Singa", "Burung"]],
+    ["Genre film favorit {n}?", ["Horor", "Komedi", "Romantis", "Action"]],
+    ["{n} paling takut sama…", ["Kecoa", "Hantu", "Ketinggian", "Dicuekin"]],
+    ["Hal pertama yang {n} lakukan pas bangun tidur?", ["Cek HP", "Langsung mandi", "Tidur lagi", "Cari makan"]],
+    ["Liburan impian {n}?", ["Pantai", "Gunung", "Luar negeri", "Staycation"]],
+    ["Kalau telat, alasan andalan {n}?", ["Macet", "Ketiduran", "Hujan", "Lupa"]],
+    ["Musik yang paling sering {n} dengar?", ["Pop Indonesia", "K-pop", "Dangdut", "Lagu barat"]],
+    ["Kalau disuruh pilih satu, {n} pilih…", ["Nasi Padang", "Bakso", "Sate", "Mie ayam"]],
+    ["Soal janjian, {n} tipe yang…", ["Datang paling awal", "Pas waktunya", "Telat sedikit", "Telat banget"]],
+    ["Di grup chat, {n} biasanya…", ["Paling rame", "Cuma baca", "Kirim stiker doang", "Balas besoknya"]],
+    ["Tempat nongkrong favorit {n}?", ["Kafe", "Mall", "Rumah aja", "Warung kopi"]],
+    ["Olahraga favorit {n}?", ["Futsal atau bola", "Badminton", "Jalan kaki", "Rebahan"]],
+    ["Kalau belanja online, {n} paling sering beli…", ["Baju", "Makanan", "Gadget", "Barang random"]],
+    ["Kekuatan super yang {n} mau?", ["Teleportasi", "Baca pikiran", "Menghilang", "Terbang"]],
+    ["Kalau lagi kesal, {n} biasanya…", ["Diam", "Ngomel", "Makan", "Tidur"]],
+    ["Sarapan favorit {n}?", ["Nasi uduk", "Bubur ayam", "Roti", "Nggak sarapan"]],
+    ["Kalau menang undian, {n} pilih hadiah…", ["Motor", "Tiket konser", "HP baru", "Uang tunai"]],
+    ["Kebiasaan {n} pas nonton film di bioskop?", ["Beli popcorn", "Main HP", "Ketiduran", "Komentar terus"]],
+  ];
+
+  const $ = (s) => document.querySelector(s);
+  const rnd = (n, chars = "abcdefghijkmnpqrstuvwxyz23456789") => Array.from(crypto.getRandomValues(new Uint32Array(n)), (x) => chars[x % chars.length]).join("");
+  const str = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  function h(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v; else if (k === "style") e.style.cssText = v;
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of kids.flat()) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(String(c))); }
+    return e;
+  }
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  let toastT = 0;
+  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
+  function colorOf(pid) { let x = 0; for (const c of pid) x = (x * 31 + c.charCodeAt(0)) >>> 0; return AV[x % AV.length]; }
+  const avatar = (p, small) => h("div", { class: "av" + (small ? " s" : ""), style: `background:${colorOf(p.pid)}` }, (p.name[0] || "?").toUpperCase());
+
+  // ---------------- identity & connection ----------------
+  const ME = ls.get("spt-me", null) || { pid: rnd(10), key: rnd(16), name: "" };
+  ls.set("spt-me", ME);
+  let client = null, code = null, isHost = false, online = false, pub = null, skew = 0, joinTimer = 0, lastPubSeen = "";
+  const topic = (s) => NS + code + "/" + s;
+
+  function connect(roomCode, asHost) {
+    if (client) try { client.end(true); } catch {}
+    code = roomCode; isHost = asHost; pub = null; lastPubSeen = ""; lastPub = "";
+    client = mqtt.connect(BROKER, { clientId: "spt_" + ME.pid + "_" + rnd(4), clean: true, reconnectPeriod: 2000, connectTimeout: 10000, keepalive: 30 });
+    client.on("connect", () => {
+      online = true; renderNet();
+      const subs = [topic("pub")]; if (isHost) subs.push(topic("up"));
+      client.subscribe(subs, { qos: 1 }, () => { if (isHost) flush(); send({ t: "join", name: ME.name }); });
+    });
+    client.on("close", () => { online = false; renderNet(); });
+    client.on("message", (t, payload) => {
+      let m; try { m = JSON.parse(payload.toString()); } catch { return; }
+      if (!m || typeof m !== "object") return;
+      if (t === topic("up")) { if (isHost) hostOnUp(m); return; }
+      skew = (m.now || Date.now()) - Date.now(); clearTimeout(joinTimer);
+      const k = JSON.stringify({ ...m, now: 0 }); if (k === lastPubSeen) return;
+      lastPubSeen = k; const prev = pub; pub = m; render(prev);
+    });
+    showRoom();
+    if (!isHost) joinTimer = setTimeout(() => { if (!pub) { leave(); $("#joinErr").textContent = "Room tidak ditemukan atau tuan rumahnya offline. Cek lagi kodenya."; } }, 9000);
+  }
+  function send(o) { if (client) client.publish(topic("up"), JSON.stringify({ ...o, pid: ME.pid, key: ME.key }), { qos: 1 }); }
+  setInterval(() => { if (client && online) send({ t: "ping" }); }, 4000);
+
+  // ---------------- HOST ----------------
+  let H = null, lastPub = "", pubTimer = 0;
+  function hostNew(c) {
+    H = { code: c, host: ME.pid, phase: "lobby", total: 12, players: {}, order: [], customs: [], inGame: [], qs: [], qi: -1, deadline: 0, answers: {}, reveal: null, titles: [], saved: 0 };
+    hostSave();
+  }
+  function hostSave() { H.saved = Date.now(); ls.set("spt-host", H); }
+  const P = (pid) => H.players[pid];
+  const isOn = (pid) => pid === H.host || Date.now() - P(pid).seen < 12000;
+
+  function hostOnUp(m) {
+    const pid = str(m.pid, 24), key = str(m.key, 40); if (!pid || !key) return;
+    let p = P(pid); if (p && p.key !== key) return;
+    if (m.t === "join") {
+      if (!p) {
+        if (H.order.length >= MAX_PLAYERS + 4) return;
+        const taken = new Set(H.order.map((x) => P(x).name.toLowerCase()));
+        let base = str(m.name, 14) || "Pemain", n = base, i = 2; while (taken.has(n.toLowerCase())) n = base + " " + i++;
+        p = H.players[pid] = { name: n, key, score: 0, seen: Date.now() };
+        H.order.push(pid);
+      }
+      p.seen = Date.now(); return hostPublish();
+    }
+    if (!p) return; p.seen = Date.now();
+    if (m.t === "leave") { if (pid !== H.host && H.phase === "lobby") { delete H.players[pid]; H.order = H.order.filter((x) => x !== pid); } return hostPublish(); }
+    if (m.t === "custom" && H.phase === "lobby") {
+      let text = str(m.text, 110); if (text.length < 8) return;
+      if (!/\?$/.test(text)) text += "?";
+      if (H.customs.length < 30 && !H.customs.some((c) => c.text.toLowerCase() === text.toLowerCase())) H.customs.push({ text, by: pid });
+      return hostPublish();
+    }
+    if (m.t === "ans" && H.phase === "question" && m.qi === H.qi && H.inGame.includes(pid)) {
+      const q = H.qs[H.qi];
+      if (q.type === "vote") { const v = str(m.v, 24); if (!H.inGame.includes(v)) return; H.answers[pid] = v; }
+      else { const v = Number(m.v); if (!(v >= 0 && v <= 3)) return; H.answers[pid] = v; }
+      const need = H.inGame.filter(isOn);
+      if (need.every((x) => H.answers[x] !== undefined)) resolve(); else hostPublish();
+    }
+  }
+  function gelarOf(text) {
+    const m = text.match(/paling\s+(.+?)\s*\??$/i);
+    if (!m) return "Pilihan Teman-teman";
+    const words = m[1].split(/\s+/).slice(0, 4).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    return ("Si Paling " + words.join(" ")).slice(0, 32);
+  }
+  function buildQuestions(players) {
+    const nVote = Math.ceil(H.total / 2);
+    // custom questions go first so they are guaranteed a slot, then the order is shuffled
+    const pool = [...shuffle(H.customs.map((c) => ({ type: "vote", text: c.text, gelar: gelarOf(c.text) }))),
+                  ...shuffle(VOTE_BANK.map(([text, gelar]) => ({ type: "vote", text, gelar })))];
+    const votes = shuffle(pool.slice(0, nVote));
+    const seats = shuffle([...SEAT_BANK]), seatOrder = shuffle([...players]);
+    const qs = [];
+    let vi = 0, si = 0, so = 0;
+    for (let i = 0; i < H.total; i++) {
+      if (i % 2 === 0 && vi < votes.length) qs.push(votes[vi++]);
+      else { const [text, opts] = seats[si++ % seats.length]; qs.push({ type: "seat", text, opts, seat: seatOrder[so++ % seatOrder.length] }); }
+    }
+    return qs;
+  }
+  function hostStart() {
+    const ps = H.order.filter(isOn);
+    if (ps.length < MIN_PLAYERS) return toast(`Butuh minimal ${MIN_PLAYERS} pemain online.`);
+    H.inGame = ps.slice(0, MAX_PLAYERS);
+    for (const x of H.order) P(x).score = 0;
+    H.titles = []; H.qs = buildQuestions(H.inGame); H.qi = -1;
+    nextQuestion();
+  }
+  function nextQuestion() {
+    H.qi++;
+    if (H.qi >= H.qs.length) { H.phase = "final"; H.deadline = 0; H.reveal = null; return hostPublish(); }
+    const q = H.qs[H.qi];
+    if (q.type === "seat" && !H.inGame.includes(q.seat)) q.seat = H.inGame[H.qi % H.inGame.length];
+    H.phase = "question"; H.answers = {}; H.reveal = null; H.deadline = Date.now() + Q_SECS * 1000;
+    hostPublish();
+  }
+  function resolve() {
+    const q = H.qs[H.qi], gains = {};
+    if (q.type === "vote") {
+      const tally = {}; for (const [voter, v] of Object.entries(H.answers)) (tally[v] = tally[v] || []).push(voter);
+      const max = Math.max(0, ...Object.values(tally).map((a) => a.length));
+      const top = max ? Object.keys(tally).filter((k) => tally[k].length === max) : [];
+      for (const [voter, v] of Object.entries(H.answers)) if (top.includes(v)) gains[voter] = 100;
+      for (const t of top) H.titles.push({ pid: t, gelar: q.gelar, text: q.text });
+      H.reveal = { type: "vote", tally, top };
+    } else {
+      const ans = H.answers[q.seat];
+      const correct = ans === undefined ? [] : Object.keys(H.answers).filter((x) => x !== q.seat && H.answers[x] === ans);
+      for (const c of correct) gains[c] = 100;
+      if (correct.length) gains[q.seat] = 50 * correct.length;
+      H.reveal = { type: "seat", answer: ans ?? null, guesses: Object.fromEntries(Object.entries(H.answers).filter(([x]) => x !== q.seat)), correct };
+    }
+    for (const [x, g] of Object.entries(gains)) if (P(x)) P(x).score += g;
+    H.reveal.gains = gains;
+    H.phase = "reveal"; H.deadline = Date.now() + REVEAL_SECS * 1000;
+    hostPublish();
+  }
+  function hostReset() { H.phase = "lobby"; H.qi = -1; H.qs = []; H.reveal = null; H.deadline = 0; hostPublish(); }
+  function hostKick(pid) { if (H.phase !== "lobby" || pid === H.host) return; delete H.players[pid]; H.order = H.order.filter((x) => x !== pid); hostPublish(); }
+  setInterval(() => {
+    if (!isHost || !H) return;
+    if (H.phase === "question" && Date.now() > H.deadline) resolve();
+    else if (H.phase === "reveal" && Date.now() > H.deadline) nextQuestion();
+    else hostPublish();
+  }, 500);
+  function hostPublish() { if (!isHost || !H) return; hostSave(); if (!pubTimer) pubTimer = setTimeout(flush, 100); }
+  function flush() {
+    pubTimer = 0; if (!client || !online || !H) return;
+    const q = H.qs[H.qi];
+    const msg = {
+      code: H.code, host: H.host, phase: H.phase, total: H.total, qi: H.qi, qn: H.qs.length, deadline: H.deadline, now: 0,
+      q: q && (H.phase === "question" || H.phase === "reveal") ? q : null,
+      answered: H.phase === "question" ? Object.keys(H.answers) : [],
+      reveal: H.phase === "reveal" ? H.reveal : null,
+      inGame: H.inGame, customs: H.customs.map((c) => c.text), titles: H.phase === "final" ? H.titles : [],
+      players: H.order.map((x) => ({ pid: x, name: P(x).name, score: P(x).score, online: isOn(x) })),
+    };
+    const k = JSON.stringify(msg); if (k === lastPub) return; lastPub = k; msg.now = Date.now();
+    client.publish(topic("pub"), JSON.stringify(msg), { qos: 1, retain: true });
+  }
+  setInterval(() => { lastPub = ""; if (isHost) hostPublish(); }, 10000);
+
+  // ---------------- UI ----------------
+  let myAns = { qi: -1, v: null };
+  const byPid = () => Object.fromEntries((pub?.players || []).map((p) => [p.pid, p]));
+  function renderNet() { $("#netChip").classList.toggle("on", online); $("#netText").textContent = online ? (isHost ? "Tuan rumah" : "Terhubung") : "Menyambung…"; }
+  const qText = (q, P2) => q.type === "seat" ? q.text.replace("{n}", P2[q.seat]?.name || "dia") : q.text;
+
+  function render(prev) {
+    renderNet(); renderBoard();
+    // keep a half-typed custom question (and its focus) across re-renders
+    const draft = $("#customInput"), draftVal = draft ? draft.value : "", draftFocus = draft && document.activeElement === draft;
+    const main = $("#main"); main.replaceChildren();
+    if (!pub) { main.append(h("div", { class: "panel" }, h("h2", {}, "Menyambung…"), h("p", { class: "muted" }, "Menghubungi tuan rumah room " + code + "."))); return; }
+    if (pub.qi !== myAns.qi) myAns = { qi: pub.qi, v: null };
+    if (pub.phase === "lobby") {
+      renderLobby(main);
+      const inp = $("#customInput");
+      if (inp && draftVal) inp.value = draftVal;
+      if (inp && draftFocus) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+    }
+    else if (pub.phase === "final") renderFinal(main);
+    else renderQuestion(main);
+    if (prev && prev.phase !== "reveal" && pub.phase === "reveal") { const g = pub.reveal?.gains?.[ME.pid]; if (g) toast(`+${g} poin!`); }
+    tick();
+  }
+
+  function renderBoard() {
+    const box = $("#board"); box.replaceChildren(); if (!pub) return;
+    const list = pub.players.slice().sort((a, b) => b.score - a.score);
+    for (const p of list) {
+      const inGame = pub.inGame?.includes(p.pid) && pub.phase !== "lobby";
+      const answered = pub.answered?.includes(p.pid);
+      box.append(h("div", { class: "pl" + (p.online ? "" : " off") },
+        avatar(p, true),
+        h("div", { style: "min-width:0" }, h("div", { class: "nm" }, p.name + (p.pid === ME.pid ? " (kamu)" : "")),
+          h("div", { class: "row", style: "gap:4px" },
+            p.pid === pub.host ? h("span", { class: "tag" }, "tuan rumah") : null,
+            !p.online ? h("span", { class: "tag" }, "offline") : null,
+            pub.phase !== "lobby" && !inGame ? h("span", { class: "tag" }, "menonton") : null,
+            pub.phase === "question" && inGame ? (answered ? h("span", { class: "ok" }, "✓ sudah jawab") : h("span", { class: "tag" }, "berpikir…")) : null)),
+        h("span", { class: "sc" }, p.score)));
+    }
+  }
+
+  function renderLobby(main) {
+    const link = location.origin + location.pathname + "#" + code;
+    const onlineN = pub.players.filter((p) => p.online).length;
+    main.append(h("div", { class: "panel" },
+      h("p", { class: "muted" }, "Kode room"), h("div", { class: "big-code" }, code),
+      h("div", { class: "row" },
+        h("button", { class: "btn", type: "button", onclick: () => copy(link, "Link disalin. Kirim ke teman!") }, "Salin link undangan"),
+        h("button", { class: "btn ghost", type: "button", onclick: () => copy(code, "Kode disalin") }, "Salin kode")),
+      h("p", { class: "muted" }, `Teman cukup buka link, isi nama, lalu klik Gabung. ${MIN_PLAYERS}–${MAX_PLAYERS} pemain.`)));
+    // custom questions
+    const input = h("input", { type: "text", id: "customInput", maxlength: "110", placeholder: "Siapa yang paling mungkin…" });
+    const addForm = h("form", { class: "row", autocomplete: "off", onsubmit: (e) => {
+      e.preventDefault(); const t = input.value.trim();
+      if (t.length < 8) return toast("Pertanyaannya terlalu pendek.");
+      send({ t: "custom", text: t }); input.value = ""; toast("Pertanyaan ditambahkan");
+    } }, h("div", { style: "flex:1;min-width:200px" }, input), h("button", { class: "btn small", type: "submit" }, "Tambah"));
+    main.append(h("div", { class: "panel" },
+      h("h2", {}, "Pertanyaan buatan kalian"),
+      h("p", { class: "muted" }, "Opsional. Tulis pertanyaan \"Siapa yang paling…\" tentang kelompok kalian. Pertanyaan ini pasti muncul di game."),
+      addForm,
+      pub.customs.length ? h("div", { class: "customs" }, ...pub.customs.map((t) => h("div", {}, t))) : h("p", { class: "muted" }, "Belum ada. Kalau kosong, game memakai bank pertanyaan bawaan.")));
+    // start
+    const panel = h("div", { class: "panel" });
+    if (isHost) {
+      panel.append(h("div", { class: "row" },
+        h("label", { class: "f", for: "totalSel", style: "flex:1;min-width:160px" }, "Jumlah pertanyaan",
+          h("select", { id: "totalSel", onchange: (e) => { H.total = +e.target.value; hostPublish(); } },
+            ...[8, 12, 16, 20].map((n) => h("option", { value: n, selected: pub.total === n }, `${n} pertanyaan`)))),
+        h("button", { class: "btn", type: "button", style: "align-self:end", disabled: onlineN < MIN_PLAYERS, onclick: hostStart },
+          onlineN < MIN_PLAYERS ? `Butuh ${MIN_PLAYERS - onlineN} pemain lagi` : "Mulai kuis")));
+    } else panel.append(h("p", { class: "muted", style: "font-size:15px" }, `Menunggu tuan rumah memulai. ${onlineN} pemain online.`));
+    main.append(panel);
+  }
+
+  function renderQuestion(main) {
+    const q = pub.q; if (!q) return;
+    const P2 = byPid(), playing = pub.inGame.includes(ME.pid), iAmSeat = q.type === "seat" && q.seat === ME.pid;
+    const reveal = pub.phase === "reveal" ? pub.reveal : null;
+    main.append(h("div", { class: "panel qcard" },
+      h("div", { class: "row" }, h("span", { class: "qtype" }, q.type === "vote" ? "Paling mungkin" : "Kursi panas"), h("span", { class: "muted" }, `Pertanyaan ${pub.qi + 1} dari ${pub.qn}`)),
+      h("div", { class: "progress" }, h("i", { style: `width:${((pub.qi + (reveal ? 1 : 0)) / pub.qn) * 100}%` })),
+      h("div", { class: "qtext" }, qText(q, P2)),
+      h("p", { class: "muted" }, reveal ? "Hasilnya…"
+        : !playing ? "Kamu menonton ronde ini."
+        : q.type === "vote" ? "Pilih satu teman. Boleh pilih diri sendiri."
+        : iAmSeat ? "Kamu di kursi panas! Pilih jawaban yang jujur. Kamu dapat +50 untuk setiap teman yang menebak benar."
+        : `Tebak jawaban ${P2[q.seat]?.name || "dia"}.`)));
+
+    if (!reveal) {
+      const answered = myAns.v !== null || pub.answered.includes(ME.pid);
+      if (q.type === "vote") {
+        const grid = h("div", { class: "pick" });
+        for (const pid of pub.inGame) {
+          const p = P2[pid]; if (!p) continue;
+          grid.append(h("button", { type: "button", "aria-pressed": String(myAns.v === pid), disabled: !playing,
+            onclick: () => { myAns = { qi: pub.qi, v: pid }; send({ t: "ans", qi: pub.qi, v: pid }); render(); } },
+            avatar(p), h("span", { class: "nm" }, p.name + (pid === ME.pid ? " (kamu)" : ""))));
+        }
+        main.append(h("div", { class: "panel" }, grid, answered ? h("p", { class: "muted" }, "Jawaban terkirim. Masih bisa diganti sebelum waktu habis.") : null));
+      } else {
+        const opts = h("div", { class: "opts" });
+        q.opts.forEach((o, i) => opts.append(h("button", { type: "button", class: "o" + i, "aria-pressed": String(myAns.v === i), disabled: !playing,
+          onclick: () => { myAns = { qi: pub.qi, v: i }; send({ t: "ans", qi: pub.qi, v: i }); render(); } },
+          h("span", { class: "l" }, "ABCD"[i]), o)));
+        main.append(h("div", { class: "panel" }, opts, answered ? h("p", { class: "muted" }, "Jawaban terkirim. Masih bisa diganti sebelum waktu habis.") : null));
+      }
+      return;
+    }
+    // ----- reveal -----
+    const gains = reveal.gains || {};
+    if (reveal.type === "vote") {
+      const total = Object.values(reveal.tally).reduce((a, b) => a + b.length, 0) || 1;
+      const rows = Object.entries(reveal.tally).sort((a, b) => b[1].length - a[1].length);
+      const res = h("div", { class: "res" });
+      if (reveal.top.length) res.append(h("div", {}, h("p", { class: "muted" }, "Gelar baru:"), h("div", { class: "gelar" }, `${reveal.top.map((x) => P2[x]?.name || "?").join(" & ")}: ${q.gelar}`)));
+      else res.append(h("p", { class: "muted" }, "Tidak ada yang memilih."));
+      for (const [pid, voters] of rows) {
+        const p = P2[pid] || { pid, name: "?" };
+        res.append(h("div", { class: "r" + (reveal.top.includes(pid) ? " top" : "") }, avatar(p),
+          h("div", {}, h("div", { class: "nm", style: "font-weight:900" }, `${p.name} · ${voters.length} suara`),
+            h("div", { class: "bars" }, h("i", { style: `width:${(voters.length / total) * 100}%` })),
+            h("div", { class: "voters" }, ...voters.map((v) => h("span", { class: "tag" }, "dipilih " + (P2[v]?.name || "?")))))));
+      }
+      main.append(h("div", { class: "panel" }, res, gainLine(gains, P2)));
+    } else {
+      const seatName = P2[q.seat]?.name || "Dia";
+      const opts = h("div", { class: "opts" });
+      q.opts.forEach((o, i) => {
+        const who = Object.entries(reveal.guesses).filter(([, v]) => v === i).map(([x]) => P2[x]?.name || "?");
+        opts.append(h("button", { type: "button", class: "o" + i + (reveal.answer !== null && reveal.answer !== i ? " dim" : ""), "aria-pressed": String(reveal.answer === i), disabled: true },
+          h("span", { class: "l" }, "ABCD"[i]), h("span", {}, o, who.length ? h("div", { style: "font-size:12px;font-weight:700;opacity:.9" }, "Tebakan: " + who.join(", ")) : null)));
+      });
+      main.append(h("div", { class: "panel" },
+        h("div", { class: "gelar" }, reveal.answer === null ? `${seatName} tidak menjawab` : `Jawaban ${seatName}: ${q.opts[reveal.answer]}`),
+        opts,
+        h("p", { class: "muted" }, reveal.correct.length ? `${reveal.correct.map((x) => P2[x]?.name || "?").join(", ")} menebak benar.` : "Tidak ada yang menebak benar."),
+        gainLine(gains, P2)));
+    }
+    if (isHost) main.append(h("div", { class: "row" }, h("button", { class: "btn ghost", type: "button", onclick: () => { H.deadline = 0; } }, pub.qi + 1 >= pub.qn ? "Lihat hasil akhir" : "Lanjut")));
+  }
+  function gainLine(gains, P2) {
+    const e = Object.entries(gains); if (!e.length) return null;
+    return h("div", { class: "row" }, ...e.map(([x, g]) => h("span", { class: "chip" }, h("span", { class: "gain" }, `+${g}`), P2[x]?.name || "?")));
+  }
+
+  function renderFinal(main) {
+    const P2 = byPid();
+    const res = pub.players.filter((p) => pub.inGame.includes(p.pid)).sort((a, b) => b.score - a.score);
+    main.append(h("div", { class: "panel" },
+      h("p", { class: "muted" }, "Yang paling kenal teman-temannya"),
+      h("h2", { style: "font-size:clamp(34px,9vw,56px);color:var(--koral)" }, res[0] ? res.filter((p) => p.score === res[0].score).map((p) => p.name).join(" & ") : "Selesai"),
+      h("div", { class: "podium" }, ...res.map((p, i) => h("div", { class: "r" }, h("span", { class: "rank" }, i + 1), h("span", {}, p.name + (p.pid === ME.pid ? " (kamu)" : "")), h("span", {}, p.score + " poin"))))));
+    const byP = {}; for (const t of pub.titles) (byP[t.pid] = byP[t.pid] || []).push(t.gelar);
+    const titles = h("div", { class: "titles" });
+    for (const [pid, gs] of Object.entries(byP).sort((a, b) => b[1].length - a[1].length)) titles.append(h("div", {}, h("b", {}, P2[pid]?.name || "?"), gs.join(" · ")));
+    main.append(h("div", { class: "panel" }, h("h2", {}, "Gelar yang didapat"), Object.keys(byP).length ? titles : h("p", { class: "muted" }, "Belum ada gelar.")));
+    main.append(isHost ? h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: hostReset }, "Main lagi")) : h("p", { class: "muted" }, "Tunggu tuan rumah memulai game baru."));
+  }
+
+  function tick() {
+    const el = $("#timer");
+    if (!pub || (pub.phase !== "question" && pub.phase !== "reveal") || !pub.deadline) { el.textContent = ""; return; }
+    const s = Math.max(0, Math.ceil((pub.deadline - (Date.now() + skew)) / 1000));
+    el.textContent = pub.phase === "question" ? s : "";
+    el.classList.toggle("hot", s <= 5);
+  }
+  setInterval(tick, 250);
+
+  async function copy(text, msg) { try { await navigator.clipboard.writeText(text); toast(msg); } catch { toast(text); } }
+  function showHome() {
+    $("#home").hidden = false; $("#room").hidden = true; history.replaceState(null, "", location.pathname);
+    const saved = ls.get("spt-host", null);
+    if (saved && saved.host === ME.pid && Date.now() - saved.saved < 3 * 3600 * 1000 && !$("#resumeBtn")) {
+      $(".home-grid").append(h("div", { class: "panel", id: "resumePanel" }, h("h2", {}, "Lanjutkan"),
+        h("p", { class: "muted" }, `Room ${saved.code} yang kamu buat tadi (${saved.order.length} pemain).`),
+        h("button", { class: "btn", type: "button", id: "resumeBtn", onclick: () => { H = ls.get("spt-host", null); if (H) connect(H.code, true); } }, "Lanjutkan sebagai tuan rumah")));
+    }
+  }
+  function showRoom() { $("#home").hidden = true; $("#room").hidden = false; $("#codeChip").textContent = code; history.replaceState(null, "", location.pathname + "#" + code); render(); }
+  function leave() {
+    if (!isHost) send({ t: "leave" });
+    if (isHost && client) { client.publish(topic("pub"), "", { retain: true }); ls.del("spt-host"); $("#resumePanel")?.remove(); }
+    const c = client; setTimeout(() => { try { c && c.end(true); } catch {} }, 150);
+    client = null; online = false; H = null; isHost = false; pub = null; showHome();
+  }
+  function setName(v) { ME.name = str(v, 14) || "Pemain"; ls.set("spt-me", ME); }
+  $("#nameCreate").value = $("#nameJoin").value = ME.name || "";
+  const hashCode = (location.hash || "").replace("#", "").toUpperCase().slice(0, 5);
+  if (/^[A-Z0-9]{5}$/.test(hashCode)) { $("#codeJoin").value = hashCode; setTimeout(() => $("#nameJoin").focus(), 50); }
+  $("#formCreate").addEventListener("submit", (e) => { e.preventDefault(); setName($("#nameCreate").value); const c = rnd(5, CODE_CHARS); hostNew(c); connect(c, true); });
+  $("#formJoin").addEventListener("submit", (e) => {
+    e.preventDefault(); setName($("#nameJoin").value); $("#joinErr").textContent = "";
+    const c = $("#codeJoin").value.trim().toUpperCase();
+    if (!/^[A-Z0-9]{5}$/.test(c)) { $("#joinErr").textContent = "Kode room terdiri dari 5 huruf/angka."; return; }
+    const saved = ls.get("spt-host", null);
+    if (saved && saved.code === c && saved.host === ME.pid) { H = saved; connect(c, true); return; }
+    connect(c, false);
+  });
+  $("#leaveBtn").addEventListener("click", leave);
+  addEventListener("beforeunload", (e) => { if (isHost && H && H.phase !== "lobby" && H.phase !== "final") { e.preventDefault(); e.returnValue = ""; } });
+  if (typeof mqtt === "undefined") $("#joinErr").textContent = "Gagal memuat komponen koneksi. Cek internet lalu muat ulang halaman.";
+  showHome();
+  if (/^[A-Z0-9]{5}$/.test(hashCode)) history.replaceState(null, "", location.pathname + "#" + hashCode);
+})();
+</script>
+</body>
+</html>
